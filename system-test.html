@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDosSeek - 系统测试平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f7fafc 100%);
+            color: #2d3748;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.8), transparent);
+            background-size: 200% 100%;
+            animation: cardShimmer 3s infinite;
+        }
+
+        @keyframes cardShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .glass-effect:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(24, 144, 255, 0.3);
+        }
+
+        .top-navbar {
+            height: 64px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1890ff;
+        }
+
+        .logo i {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #4a5568;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890ff, #52c41a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            bottom: 0;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 24px 0;
+            z-index: 999;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 4px 16px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(24, 144, 255, 0.1);
+            color: #1890ff;
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .test-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(56, 161, 105, 0.2);
+            color: #38a169;
+            animation: pulse 2s infinite;
+        }
+
+        .test-status.running {
+            background: rgba(214, 158, 46, 0.2);
+            color: #d69e2e;
+        }
+
+        .action-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary { background: #3182ce; color: white; }
+        .btn-success { background: #38a169; color: white; }
+        .btn-warning { background: #d69e2e; color: white; }
+        .btn-danger { background: #e53e3e; color: white; }
+
+        .btn-primary:hover { background: #2c5282; }
+        .btn-success:hover { background: #2f855a; }
+        .btn-warning:hover { background: #b7791f; }
+        .btn-danger:hover { background: #c53030; }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.8), transparent);
+            background-size: 200% 100%;
+            animation: cardShimmer 3s infinite;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: iconShine 2s infinite;
+        }
+
+        @keyframes iconShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .stat-value-container {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .stat-change.positive {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #e53e3e;
+        }
+
+        .stat-change.neutral {
+            background: rgba(113, 128, 150, 0.1);
+            color: #718096;
+        }
+
+        .stat-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-subtitle {
+            font-size: 11px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .stat-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: statusPulse 2s infinite;
+        }
+
+        .status-dot.active { background: #22c55e; }
+        .status-dot.warning { background: #f59e0b; }
+        .status-dot.danger { background: #ef4444; }
+
+        @keyframes statusPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .stat-mini-chart {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .stat-mini-chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3182ce, #63b3ed);
+            animation: chartFill 2s ease-out;
+        }
+
+        @keyframes chartFill {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+
+        .test-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .test-config {
+            padding: 20px;
+        }
+
+        .config-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #2d3748;
+        }
+
+        .test-scenarios {
+            display: grid;
+            gap: 12px;
+        }
+
+        .scenario-item {
+            padding: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .scenario-item:hover {
+            border-color: #3182ce;
+            background: rgba(49, 130, 206, 0.05);
+        }
+
+        .scenario-item.active {
+            border-color: #3182ce;
+            background: rgba(49, 130, 206, 0.1);
+        }
+
+        .scenario-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .scenario-desc {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .scenario-params {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .param-tag {
+            padding: 2px 6px;
+            background: rgba(49, 130, 206, 0.1);
+            color: #3182ce;
+            border-radius: 10px;
+            font-size: 10px;
+        }
+
+        .test-monitor {
+            padding: 20px;
+        }
+
+        .monitor-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .test-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3182ce, #63b3ed);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 16px;
+        }
+
+        .test-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #2d3748;
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .results-table {
+            padding: 20px;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .test-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .test-table th,
+        .test-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .test-table th {
+            background: rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-success { background: rgba(56, 161, 105, 0.2); color: #38a169; }
+        .status-warning { background: rgba(214, 158, 46, 0.2); color: #d69e2e; }
+        .status-danger { background: rgba(229, 62, 62, 0.2); color: #e53e3e; }
+        .status-info { background: rgba(49, 130, 206, 0.2); color: #3182ce; }
+
+        .test-summary {
+            padding: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .summary-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        @media (max-width: 1200px) {
+            .test-layout,
+            .test-charts,
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-navbar">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            DDosSeek
+        </div>
+        <div class="user-section">
+            <i class="fas fa-bell" style="cursor: pointer; color: #faad14;"></i>
+            <div class="user-avatar">A</div>
+            <span>管理员</span>
+        </div>
+    </nav>
+
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i>系统仪表盘</a></li>
+            <li><a href="network-monitor.html"><i class="fas fa-network-wired"></i>网络监测中心</a></li>
+            <li><a href="ddos-detection.html"><i class="fas fa-shield-virus"></i>DDoS检测防护</a></li>
+            <li><a href="firewall-management.html"><i class="fas fa-fire-extinguisher"></i>防火墙管理</a></li>
+            <li><a href="log-center.html"><i class="fas fa-file-alt"></i>智能日志中心</a></li>
+            <li><a href="deepseek-assistant.html"><i class="fas fa-robot"></i>DeepSeek AI助手</a></li>
+            <li><a href="rule-config.html"><i class="fas fa-cogs"></i>规则配置中心</a></li>
+            <li><a href="system-test.html" class="active"><i class="fas fa-vial"></i>系统测试平台</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" style="margin-bottom: 16px; font-size: 12px; color: #718096;">
+            <span><i class="fas fa-home"></i> 首页</span>
+            <span style="margin: 0 8px;">/</span>
+            <span><a href="dashboard.html" style="color: #718096; text-decoration: none;">系统仪表盘</a></span>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #3182ce; font-weight: 500;">系统测试平台</span>
+        </nav>
+
+        <div class="page-header">
+            <div class="page-title">
+                <i class="fas fa-vial"></i>
+                系统测试平台
+                <div class="test-status" id="testStatus">待机状态</div>
+            </div>
+            <div class="action-controls">
+                <button class="action-btn btn-success" onclick="startTest()">
+                    <i class="fas fa-play"></i> 开始测试
+                </button>
+                <button class="action-btn btn-warning" onclick="pauseTest()">
+                    <i class="fas fa-pause"></i> 暂停测试
+                </button>
+                <button class="action-btn btn-danger" onclick="stopTest()">
+                    <i class="fas fa-stop"></i> 停止测试
+                </button>
+                <button class="action-btn btn-primary" onclick="exportReport()">
+                    <i class="fas fa-download"></i> 导出报告
+                </button>
+            </div>
+        </div>
+
+        <section class="stats-section">
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">累计测试数量</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3182ce, #63b3ed);">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #3182ce;">247</div>
+                    <div class="stat-change positive">+12</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">本周新增测试</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>活跃</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 82%; background: linear-gradient(90deg, #3182ce, #63b3ed);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">防护成功率</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #38a169, #68d391);">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #38a169;">98.7%</div>
+                    <div class="stat-change positive">+0.2%</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">攻击拦截效果</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>优秀</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 98.7%; background: linear-gradient(90deg, #38a169, #68d391);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">平均响应时间</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #d69e2e, #f6ad55);">
+                        <i class="fas fa-stopwatch"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #d69e2e;">15ms</div>
+                    <div class="stat-change negative">-2ms</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">检测响应延迟</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>良好</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 75%; background: linear-gradient(90deg, #d69e2e, #f6ad55);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">误报率水平</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #e53e3e, #f56565);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #e53e3e;">0.3%</div>
+                    <div class="stat-change neutral">持平</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">过去30天平均</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>稳定</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 3%; background: linear-gradient(90deg, #e53e3e, #f56565);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">系统处理能力</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #805ad5, #b794f6);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #805ad5;">50K</div>
+                    <div class="stat-change positive">+5K</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">请求/秒峰值</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>强劲</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 65%; background: linear-gradient(90deg, #805ad5, #b794f6);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">当前测试状态</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #667eea;">0</div>
+                    <div class="stat-change neutral">待机</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">活跃测试任务</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>就绪</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 0%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">测试覆盖率</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #13c2c2, #52c41a);">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #13c2c2;">94.2%</div>
+                    <div class="stat-change positive">+1.5%</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">场景覆盖完整度</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>全面</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 94.2%; background: linear-gradient(90deg, #13c2c2, #52c41a);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">资源利用率</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f759ab, #ff85c0);">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #f759ab;">67%</div>
+                    <div class="stat-change neutral">±0%</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">CPU内存平均占用</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>正常</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 67%; background: linear-gradient(90deg, #f759ab, #ff85c0);"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="test-layout">
+            <div class="test-config glass-effect">
+                <div class="config-header">测试场景配置</div>
+                <div class="test-scenarios">
+                    <div class="scenario-item active" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-globe" style="color: #805ad5; margin-right: 8px;"></i>
+                            HTTP Flood 攻击测试
+                        </div>
+                        <div class="scenario-desc">模拟大量HTTP请求攻击，测试Web服务器防护能力和负载均衡效果</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">1000 req/s</span>
+                            <span class="param-tag">持续60s</span>
+                            <span class="param-tag">单源IP</span>
+                            <span class="param-tag" style="background: rgba(229, 62, 62, 0.1); color: #e53e3e;">高危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-network-wired" style="color: #3182ce; margin-right: 8px;"></i>
+                            TCP SYN Flood 测试
+                        </div>
+                        <div class="scenario-desc">模拟TCP SYN半连接攻击，验证连接池防护和资源管理机制</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">5000 conn/s</span>
+                            <span class="param-tag">持续120s</span>
+                            <span class="param-tag">多源IP</span>
+                            <span class="param-tag" style="background: rgba(229, 62, 62, 0.1); color: #e53e3e;">高危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-wifi" style="color: #38a169; margin-right: 8px;"></i>
+                            UDP Flood 压力测试
+                        </div>
+                        <div class="scenario-desc">模拟UDP数据包洪水攻击，测试带宽防护和数据包过滤性能</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">100Mbps</span>
+                            <span class="param-tag">持续90s</span>
+                            <span class="param-tag">随机端口</span>
+                            <span class="param-tag" style="background: rgba(214, 158, 46, 0.1); color: #d69e2e;">中危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-bolt" style="color: #f59e0b; margin-right: 8px;"></i>
+                            ICMP Flood 测试
+                        </div>
+                        <div class="scenario-desc">模拟ICMP协议攻击，验证Ping洪水和网络层防护能力</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">50Mbps</span>
+                            <span class="param-tag">持续45s</span>
+                            <span class="param-tag">随机大小</span>
+                            <span class="param-tag" style="background: rgba(56, 161, 105, 0.1); color: #38a169;">低危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-dna" style="color: #e53e3e; margin-right: 8px;"></i>
+                            混合攻击场景
+                        </div>
+                        <div class="scenario-desc">综合HTTP、TCP、UDP多种攻击类型，全面测试系统综合防护性能</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">多协议</span>
+                            <span class="param-tag">持续300s</span>
+                            <span class="param-tag">渐进式</span>
+                            <span class="param-tag" style="background: rgba(229, 62, 62, 0.1); color: #e53e3e;">极危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-chart-line" style="color: #52c41a; margin-right: 8px;"></i>
+                            正常流量基线测试
+                        </div>
+                        <div class="scenario-desc">模拟正常业务流量模式，建立性能基线并验证系统稳定性</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">正常流量</span>
+                            <span class="param-tag">持续600s</span>
+                            <span class="param-tag">基线建立</span>
+                            <span class="param-tag" style="background: rgba(56, 161, 105, 0.1); color: #38a169;">安全</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-sitemap" style="color: #13c2c2; margin-right: 8px;"></i>
+                            分布式攻击测试
+                        </div>
+                        <div class="scenario-desc">模拟分布式僵尸网络攻击，测试大规模协调攻击的防护效果</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">100+ 源IP</span>
+                            <span class="param-tag">持续180s</span>
+                            <span class="param-tag">地理分布</span>
+                            <span class="param-tag" style="background: rgba(229, 62, 62, 0.1); color: #e53e3e;">极危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-code" style="color: #f759ab; margin-right: 8px;"></i>
+                            应用层攻击测试
+                        </div>
+                        <div class="scenario-desc">模拟SQL注入、XSS等应用层攻击，验证Web应用防火墙效果</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">混合载荷</span>
+                            <span class="param-tag">持续240s</span>
+                            <span class="param-tag">智能变异</span>
+                            <span class="param-tag" style="background: rgba(214, 158, 46, 0.1); color: #d69e2e;">中危</span>
+                        </div>
+                    </div>
+
+                    <div class="scenario-item" onclick="selectScenario(this)">
+                        <div class="scenario-title">
+                            <i class="fas fa-rocket" style="color: #722ed1; margin-right: 8px;"></i>
+                            极限压力测试
+                        </div>
+                        <div class="scenario-desc">推送系统到性能极限，测试临界点处理能力和故障恢复机制</div>
+                        <div class="scenario-params">
+                            <span class="param-tag">500K req/s</span>
+                            <span class="param-tag">持续900s</span>
+                            <span class="param-tag">资源耗尽</span>
+                            <span class="param-tag" style="background: rgba(229, 62, 62, 0.1); color: #e53e3e;">极危</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-monitor glass-effect">
+                <div class="config-header">实时监控</div>
+                <div class="monitor-controls">
+                    <span style="font-size: 13px; color: #718096;">测试进度</span>
+                    <span style="font-size: 12px; color: #3182ce;" id="progressText">0%</span>
+                </div>
+                <div class="test-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-info">
+                    <span>剩余时间: <span id="remainingTime">00:00</span></span>
+                    <span>已用时间: <span id="elapsedTime">00:00</span></span>
+                </div>
+                <div class="test-charts">
+                    <div class="chart-container">
+                        <div class="chart-title">攻击流量监控</div>
+                        <div id="attackChart" style="height: 150px;"></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">系统响应时间</div>
+                        <div id="responseChart" style="height: 150px;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <div class="results-table glass-effect">
+                <div class="config-header">测试结果记录</div>
+                <div class="table-container">
+                    <table class="test-table">
+                        <thead>
+                            <tr>
+                                <th>测试ID</th>
+                                <th>测试场景</th>
+                                <th>开始时间</th>
+                                <th>持续时间</th>
+                                <th>状态</th>
+                                <th>成功率</th>
+                                <th>响应时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testResultsBody">
+                            <tr>
+                                <td>#2024001</td>
+                                <td>HTTP Flood</td>
+                                <td>14:35:22</td>
+                                <td>60s</td>
+                                <td><span class="status-badge status-success">完成</span></td>
+                                <td>99.2%</td>
+                                <td>12ms</td>
+                            </tr>
+                            <tr>
+                                <td>#2024002</td>
+                                <td>TCP SYN Flood</td>
+                                <td>14:32:15</td>
+                                <td>120s</td>
+                                <td><span class="status-badge status-success">完成</span></td>
+                                <td>98.8%</td>
+                                <td>18ms</td>
+                            </tr>
+                            <tr>
+                                <td>#2024003</td>
+                                <td>UDP Flood</td>
+                                <td>14:28:45</td>
+                                <td>90s</td>
+                                <td><span class="status-badge status-warning">部分成功</span></td>
+                                <td>95.6%</td>
+                                <td>25ms</td>
+                            </tr>
+                            <tr>
+                                <td>#2024004</td>
+                                <td>混合攻击</td>
+                                <td>14:20:33</td>
+                                <td>300s</td>
+                                <td><span class="status-badge status-success">完成</span></td>
+                                <td>97.4%</td>
+                                <td>22ms</td>
+                            </tr>
+                            <tr>
+                                <td>#2024005</td>
+                                <td>正常流量基线</td>
+                                <td>14:15:10</td>
+                                <td>600s</td>
+                                <td><span class="status-badge status-success">完成</span></td>
+                                <td>99.9%</td>
+                                <td>8ms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="test-summary glass-effect">
+                <div class="config-header">测试汇总</div>
+                <div class="summary-item">
+                    <span class="summary-label">今日执行测试</span>
+                    <span class="summary-value">23 次</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">平均成功率</span>
+                    <span class="summary-value">98.7%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">最快响应时间</span>
+                    <span class="summary-value">8ms</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">最大处理能力</span>
+                    <span class="summary-value">52,000 req/s</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">系统稳定性</span>
+                    <span class="summary-value">99.5%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">误报次数</span>
+                    <span class="summary-value">2 次</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">总测试时长</span>
+                    <span class="summary-value">4.2 小时</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let testRunning = false;
+        let currentProgress = 0;
+        let testStartTime = null;
+        let testTimer = null;
+
+        // 初始化图表
+        const attackChart = echarts.init(document.getElementById('attackChart'));
+        const responseChart = echarts.init(document.getElementById('responseChart'));
+
+        // 攻击流量图表配置
+        const attackOption = {
+            backgroundColor: 'transparent',
+            grid: { left: '5%', right: '5%', bottom: '10%', top: '10%', containLabel: true },
+            xAxis: {
+                type: 'category',
+                data: ['0s', '10s', '20s', '30s', '40s', '50s', '60s'],
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.2)' }},
+                axisLabel: { color: '#718096', fontSize: 10 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.2)' }},
+                axisLabel: { color: '#718096', fontSize: 10 },
+                splitLine: { lineStyle: { color: 'rgba(0,0,0,0.1)' }}
+            },
+            series: [{
+                type: 'line',
+                data: [0, 120, 800, 1000, 950, 1100, 890],
+                smooth: true,
+                lineStyle: { color: '#e53e3e', width: 2 },
+                areaStyle: { color: 'rgba(229,62,62,0.1)' }
+            }]
+        };
+
+        // 响应时间图表配置
+        const responseOption = {
+            backgroundColor: 'transparent',
+            grid: { left: '5%', right: '5%', bottom: '10%', top: '10%', containLabel: true },
+            xAxis: {
+                type: 'category',
+                data: ['0s', '10s', '20s', '30s', '40s', '50s', '60s'],
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.2)' }},
+                axisLabel: { color: '#718096', fontSize: 10 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.2)' }},
+                axisLabel: { color: '#718096', fontSize: 10 },
+                splitLine: { lineStyle: { color: 'rgba(0,0,0,0.1)' }}
+            },
+            series: [{
+                type: 'line',
+                data: [8, 12, 15, 18, 16, 14, 12],
+                smooth: true,
+                lineStyle: { color: '#3182ce', width: 2 },
+                areaStyle: { color: 'rgba(49,130,206,0.1)' }
+            }]
+        };
+
+        attackChart.setOption(attackOption);
+        responseChart.setOption(responseOption);
+
+        // 选择测试场景
+        function selectScenario(element) {
+            document.querySelectorAll('.scenario-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        // 开始增强测试
+        function startTest() {
+            if (testRunning) return;
+            
+            testRunning = true;
+            currentProgress = 0;
+            testStartTime = Date.now();
+            
+            const statusElement = document.getElementById('testStatus');
+            const activeScenario = document.querySelector('.scenario-item.active .scenario-title').textContent.trim();
+            
+            statusElement.textContent = '正在初始化测试环境...';
+            statusElement.classList.add('running');
+            
+            // 更新统计数据
+            const currentTestStat = document.querySelectorAll('.stat-value')[5];
+            currentTestStat.textContent = '1';
+            
+            // 显示测试开始通知
+            showTestNotification(`开始执行 "${activeScenario}" 测试`, 'info');
+            
+            // 开始进度更新
+            testTimer = setInterval(updateProgress, 1000);
+            
+            // 模拟测试数据更新
+            startDataSimulation();
+        }
+
+        // 暂停测试
+        function pauseTest() {
+            if (!testRunning) return;
+            
+            if (testTimer) {
+                clearInterval(testTimer);
+                testTimer = null;
+                
+                const statusElement = document.getElementById('testStatus');
+                statusElement.textContent = '测试已暂停';
+            }
+        }
+
+        // 停止测试
+        function stopTest() {
+            if (!testRunning) return;
+            
+            testRunning = false;
+            currentProgress = 0;
+            
+            if (testTimer) {
+                clearInterval(testTimer);
+                testTimer = null;
+            }
+            
+            const statusElement = document.getElementById('testStatus');
+            statusElement.textContent = '待机状态';
+            statusElement.classList.remove('running');
+            
+            // 重置进度条
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressText').textContent = '0%';
+            document.getElementById('remainingTime').textContent = '00:00';
+            document.getElementById('elapsedTime').textContent = '00:00';
+            
+            // 更新统计数据
+            const currentTestStat = document.querySelectorAll('.stat-value')[5];
+            currentTestStat.textContent = '0';
+            
+            // 添加测试结果到表格
+            addTestResult();
+        }
+
+        // 更新进度
+        function updateProgress() {
+            if (!testRunning) return;
+            
+            currentProgress += 1.67; // 60秒完成
+            if (currentProgress >= 100) {
+                currentProgress = 100;
+                stopTest();
+                return;
+            }
+            
+            // 更新进度条
+            document.getElementById('progressBar').style.width = currentProgress + '%';
+            document.getElementById('progressText').textContent = Math.round(currentProgress) + '%';
+            
+            // 更新时间显示
+            const elapsed = Math.floor((Date.now() - testStartTime) / 1000);
+            const remaining = Math.max(0, 60 - elapsed);
+            
+            document.getElementById('elapsedTime').textContent = formatTime(elapsed);
+            document.getElementById('remainingTime').textContent = formatTime(remaining);
+        }
+
+        // 格式化时间
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 开始数据模拟
+        function startDataSimulation() {
+            let dataIndex = 0;
+            const attackData = [0, 120, 800, 1000, 950, 1100, 890, 650, 400, 200, 50, 0];
+            const responseData = [8, 12, 15, 18, 16, 14, 12, 10, 9, 8, 8, 8];
+            
+            const dataTimer = setInterval(() => {
+                if (!testRunning || dataIndex >= attackData.length) {
+                    clearInterval(dataTimer);
+                    return;
+                }
+                
+                // 更新图表数据
+                const newAttackData = attackData.slice(0, dataIndex + 1);
+                const newResponseData = responseData.slice(0, dataIndex + 1);
+                const newLabels = Array.from({length: dataIndex + 1}, (_, i) => `${i * 5}s`);
+                
+                attackChart.setOption({
+                    xAxis: { data: newLabels },
+                    series: [{ data: newAttackData }]
+                });
+                
+                responseChart.setOption({
+                    xAxis: { data: newLabels },
+                    series: [{ data: newResponseData }]
+                });
+                
+                dataIndex++;
+            }, 5000);
+        }
+
+        // 添加详细测试结果
+        function addTestResult() {
+            const tbody = document.getElementById('testResultsBody');
+            const newRow = tbody.insertRow(0);
+            
+            const testId = '#' + (new Date().getFullYear()) + String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+            const scenario = document.querySelector('.scenario-item.active .scenario-title').textContent.trim();
+            const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            
+            // 根据场景类型生成不同的结果
+            const scenarioTypes = {
+                'HTTP Flood 攻击测试': { duration: '60s', successRate: '99.2%', responseTime: '12ms', status: 'success' },
+                'TCP SYN Flood 测试': { duration: '120s', successRate: '98.5%', responseTime: '18ms', status: 'success' },
+                'UDP Flood 压力测试': { duration: '90s', successRate: '97.8%', responseTime: '14ms', status: 'success' },
+                'ICMP Flood 测试': { duration: '45s', successRate: '99.5%', responseTime: '8ms', status: 'success' },
+                '混合攻击场景': { duration: '300s', successRate: '96.2%', responseTime: '25ms', status: 'warning' },
+                '正常流量基线测试': { duration: '600s', successRate: '99.9%', responseTime: '6ms', status: 'success' },
+                '分布式攻击测试': { duration: '180s', successRate: '94.8%', responseTime: '32ms', status: 'warning' },
+                '应用层攻击测试': { duration: '240s', successRate: '97.1%', responseTime: '19ms', status: 'success' },
+                '极限压力测试': { duration: '900s', successRate: '89.3%', responseTime: '45ms', status: 'danger' }
+            };
+            
+            const result = scenarioTypes[scenario] || scenarioTypes['HTTP Flood 攻击测试'];
+            const statusBadges = {
+                'success': '<span class="status-badge status-success">完成</span>',
+                'warning': '<span class="status-badge status-warning">部分成功</span>',
+                'danger': '<span class="status-badge status-danger">有风险</span>'
+            };
+            
+            newRow.innerHTML = `
+                <td>${testId}</td>
+                <td>${scenario}</td>
+                <td>${time}</td>
+                <td>${result.duration}</td>
+                <td>${statusBadges[result.status]}</td>
+                <td>${result.successRate}</td>
+                <td>${result.responseTime}</td>
+            `;
+            
+            // 限制表格行数
+            if (tbody.children.length > 10) {
+                tbody.removeChild(tbody.lastChild);
+            }
+            
+            // 更新统计数据
+            const totalTests = document.querySelectorAll('.stat-value')[0];
+            totalTests.textContent = parseInt(totalTests.textContent) + 1;
+            
+            // 显示完成通知
+            showTestNotification(`"${scenario}" 测试已完成`, 'success');
+        }
+
+        // 导出增强报告
+        function exportReport() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 16px 24px;
+                background: linear-gradient(135deg, #3182ce, #63b3ed);
+                color: white;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 10000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 8px 20px rgba(49, 130, 206, 0.3);
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-file-download"></i>
+                    <div>
+                        <div>正在生成详细测试报告...</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">包含性能分析和建议</div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.querySelector('div > div').textContent = '报告生成完成！';
+                notification.style.background = 'linear-gradient(135deg, #38a169, #68d391)';
+            }, 2000);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
+        }
+
+        // 显示测试通知
+        function showTestNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                max-width: 320px;
+            `;
+            
+            const colors = {
+                'success': '#38a169',
+                'error': '#e53e3e',
+                'warning': '#d69e2e',
+                'info': '#3182ce'
+            };
+            
+            const icons = {
+                'success': 'fas fa-check-circle',
+                'error': 'fas fa-exclamation-circle',
+                'warning': 'fas fa-exclamation-triangle',
+                'info': 'fas fa-info-circle'
+            };
+            
+            notification.style.background = colors[type] || colors.info;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="${icons[type]}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // 自动消失
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 响应式图表调整
+        window.addEventListener('resize', function() {
+            attackChart.resize();
+            responseChart.resize();
+        });
+
+        // 增强统计数据更新
+        function updateAdvancedStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            const statChanges = document.querySelectorAll('.stat-change');
+            
+            if (!testRunning) {
+                // 基础值和变化范围
+                const baseValues = [247, 98.7, 15, 0.3, 50, 0, 94.2, 67];
+                const variations = [
+                    Math.floor(Math.random() * 6 - 2),     // 测试数量 ±2
+                    (Math.random() * 0.4 - 0.2).toFixed(1), // 成功率 ±0.2%
+                    Math.floor(Math.random() * 4 - 2),     // 响应时间 ±2ms
+                    (Math.random() * 0.06 - 0.03).toFixed(2), // 误报率 ±0.03%
+                    Math.floor(Math.random() * 10 - 5),    // 处理能力 ±5K
+                    0,                                      // 当前测试保持0
+                    (Math.random() * 2 - 1).toFixed(1),    // 覆盖率 ±1%
+                    Math.floor(Math.random() * 6 - 3)      // 资源利用率 ±3%
+                ];
+                
+                statValues.forEach((stat, index) => {
+                    if (index < baseValues.length) {
+                        const newValue = baseValues[index] + parseFloat(variations[index]);
+                        
+                        switch(index) {
+                            case 0: // 测试数量
+                                stat.textContent = Math.max(240, Math.floor(newValue));
+                                break;
+                            case 1: // 成功率
+                                stat.textContent = Math.max(95, Math.min(100, newValue)).toFixed(1) + '%';
+                                break;
+                            case 2: // 响应时间
+                                stat.textContent = Math.max(8, Math.floor(newValue)) + 'ms';
+                                break;
+                            case 3: // 误报率
+                                stat.textContent = Math.max(0, newValue).toFixed(1) + '%';
+                                break;
+                            case 4: // 处理能力
+                                stat.textContent = Math.max(30, Math.floor(newValue)) + 'K';
+                                break;
+                            case 5: // 当前测试
+                                if (!testRunning) stat.textContent = '0';
+                                break;
+                            case 6: // 覆盖率
+                                stat.textContent = Math.max(90, Math.min(100, newValue)).toFixed(1) + '%';
+                                break;
+                            case 7: // 资源利用率
+                                stat.textContent = Math.max(50, Math.min(90, Math.floor(newValue))) + '%';
+                                break;
+                        }
+                        
+                        // 更新变化指示器
+                        if (statChanges[index] && variations[index] !== 0) {
+                            const change = variations[index];
+                            let changeText = '';
+                            let changeClass = '';
+                            
+                            if (change > 0) {
+                                changeText = '+' + (index === 1 || index === 6 ? change + '%' : 
+                                           index === 2 ? Math.floor(change) + 'ms' :
+                                           index === 3 ? change + '%' :
+                                           index === 4 ? Math.floor(change) + 'K' : 
+                                           Math.floor(change));
+                                changeClass = 'positive';
+                            } else if (change < 0) {
+                                changeText = (index === 1 || index === 6 ? change + '%' : 
+                                           index === 2 ? Math.floor(change) + 'ms' :
+                                           index === 3 ? change + '%' :
+                                           index === 4 ? Math.floor(change) + 'K' : 
+                                           Math.floor(change));
+                                changeClass = 'negative';
+                            } else {
+                                changeText = '持平';
+                                changeClass = 'neutral';
+                            }
+                            
+                            statChanges[index].textContent = changeText;
+                            statChanges[index].className = `stat-change ${changeClass}`;
+                        }
+                    }
+                });
+                
+                // 更新迷你图表
+                const miniCharts = document.querySelectorAll('.stat-mini-chart-fill');
+                miniCharts.forEach((chart, index) => {
+                    const fillWidths = ['82%', '98.7%', '75%', '3%', '65%', '0%', '94.2%', '67%'];
+                    if (index < fillWidths.length) {
+                        chart.style.setProperty('--fill-width', fillWidths[index]);
+                    }
+                });
+            }
+        }
+        
+        // 增强测试结果更新
+        function addDetailedTestResult(scenario) {
+            const tbody = document.getElementById('testResultsBody');
+            const newRow = tbody.insertRow(0);
+            
+            const testId = '#' + (new Date().getFullYear()) + String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+            const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            
+            // 根据场景类型生成不同的结果
+            const scenarioTypes = {
+                'HTTP Flood': { duration: '60s', successRate: '99.2%', responseTime: '12ms', status: 'success' },
+                'TCP SYN Flood': { duration: '120s', successRate: '98.5%', responseTime: '18ms', status: 'success' },
+                'UDP Flood': { duration: '90s', successRate: '97.8%', responseTime: '14ms', status: 'success' },
+                'ICMP Flood': { duration: '45s', successRate: '99.5%', responseTime: '8ms', status: 'success' },
+                '混合攻击': { duration: '300s', successRate: '96.2%', responseTime: '25ms', status: 'warning' },
+                '正常流量基线': { duration: '600s', successRate: '99.9%', responseTime: '6ms', status: 'success' },
+                '分布式攻击': { duration: '180s', successRate: '94.8%', responseTime: '32ms', status: 'warning' },
+                '应用层攻击': { duration: '240s', successRate: '97.1%', responseTime: '19ms', status: 'success' },
+                '极限压力': { duration: '900s', successRate: '89.3%', responseTime: '45ms', status: 'danger' }
+            };
+            
+            const result = scenarioTypes[scenario] || scenarioTypes['HTTP Flood'];
+            const statusBadges = {
+                'success': '<span class="status-badge status-success">完成</span>',
+                'warning': '<span class="status-badge status-warning">部分成功</span>',
+                'danger': '<span class="status-badge status-danger">有风险</span>'
+            };
+            
+            newRow.innerHTML = `
+                <td>${testId}</td>
+                <td>${scenario}</td>
+                <td>${time}</td>
+                <td>${result.duration}</td>
+                <td>${statusBadges[result.status]}</td>
+                <td>${result.successRate}</td>
+                <td>${result.responseTime}</td>
+            `;
+            
+            // 限制表格行数
+            if (tbody.children.length > 10) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        }
+        
+        // 增强场景选择功能
+        function selectScenario(element) {
+            document.querySelectorAll('.scenario-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // 添加选择动画效果
+            element.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                element.style.transform = '';
+            }, 150);
+            
+            // 更新监控区域标题
+            const scenarioTitle = element.querySelector('.scenario-title').textContent.trim();
+            document.querySelector('.test-monitor .config-header').textContent = `实时监控 - ${scenarioTitle}`;
+        }
+        
+        // 导出增强报告
+        function exportReport() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 16px 24px;
+                background: linear-gradient(135deg, #3182ce, #63b3ed);
+                color: white;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 10000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 8px 20px rgba(49, 130, 206, 0.3);
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-file-download"></i>
+                    <div>
+                        <div>正在生成详细测试报告...</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">包含性能分析和建议</div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.querySelector('div > div').textContent = '报告生成完成！';
+                notification.style.background = 'linear-gradient(135deg, #38a169, #68d391)';
+            }, 2000);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
+        }
+        
+        // 初始化
+        function init() {
+            // 定时更新统计数据
+            setInterval(updateAdvancedStats, 20000);
+            
+            // 页面加载时立即更新一次
+            updateAdvancedStats();
+            
+            // 添加卡片悬停效果增强
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.03)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                });
+            });
+            
+            // 增强场景项悬停效果
+            const scenarioItems = document.querySelectorAll('.scenario-item');
+            scenarioItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateX(8px)';
+                        this.style.borderColor = 'rgba(49, 130, 206, 0.4)';
+                    }
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = '';
+                        this.style.borderColor = '';
+                    }
+                });
+            });
+        }
+
+        init();
+
+        // 初始化路由管理器
+        const router = new DDosSeekRouter('system-test');
+    </script>
+    <script src="router.js"></script>
+</body>
+</html> 

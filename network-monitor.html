@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDosSeek - 网络监测中心</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f7fafc 100%);
+            color: #2d3748;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 毛玻璃效果基础样式 */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.8), transparent);
+            background-size: 200% 100%;
+            animation: cardShimmer 3s infinite;
+        }
+
+        @keyframes cardShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .glass-effect:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(24, 144, 255, 0.3);
+        }
+
+        /* 顶部导航栏 */
+        .top-navbar {
+            height: 64px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1890ff;
+        }
+
+        .logo i {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #4a5568;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890ff, #52c41a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            bottom: 0;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 24px 0;
+            z-index: 999;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 4px 16px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(24, 144, 255, 0.1);
+            color: #1890ff;
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* 页面标题区域 */
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .refresh-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .refresh-btn {
+            padding: 8px 16px;
+            background: rgba(24, 144, 255, 0.1);
+            border: 1px solid #1890ff;
+            border-radius: 6px;
+            color: #1890ff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(24, 144, 255, 0.2);
+        }
+
+        /* 网络KPI指标区域 */
+        .network-kpi-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .network-kpi-card {
+            padding: 24px;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .network-kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.8), transparent);
+            background-size: 200% 100%;
+            animation: cardShimmer 3s infinite;
+        }
+
+        .network-kpi-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: iconShine 2s infinite;
+        }
+
+        @keyframes iconShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .kpi-value-container {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-value-large {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .kpi-unit {
+            font-size: 14px;
+            color: #718096;
+            margin-left: 4px;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .kpi-change.positive {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+        }
+
+        .kpi-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #e53e3e;
+        }
+
+        .kpi-change.neutral {
+            background: rgba(113, 128, 150, 0.1);
+            color: #718096;
+        }
+
+        .kpi-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-subtitle {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .kpi-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .kpi-trend-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .kpi-mini-chart {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .kpi-mini-chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3182ce, #63b3ed);
+            animation: chartFill 2s ease-out;
+        }
+
+        @keyframes chartFill {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+
+        /* 主监控区域 */
+        .main-monitoring-section {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+            min-height: 450px;
+        }
+
+        .monitoring-panel {
+            padding: 20px;
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .panel-subtitle {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        /* 网络拓扑图样式 */
+        .topology-container {
+            position: relative;
+            height: 380px;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(24, 144, 255, 0.05) 0%, transparent 70%);
+        }
+
+        .network-node {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .network-node::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: nodeShine 3s infinite;
+        }
+
+        @keyframes nodeShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .network-node:hover {
+            transform: scale(1.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .network-node:hover::after {
+            content: attr(data-info);
+            position: absolute;
+            top: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .node-controller {
+            background: linear-gradient(135deg, #38a169, #68d391);
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-color: rgba(56, 161, 105, 0.5);
+        }
+
+        .node-switch {
+            background: linear-gradient(135deg, #3182ce, #63b3ed);
+            border-color: rgba(49, 130, 206, 0.5);
+        }
+
+        .node-host {
+            background: linear-gradient(135deg, #805ad5, #b794f6);
+            border-color: rgba(128, 90, 213, 0.5);
+        }
+
+        .node-status {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: statusBlink 2s infinite;
+        }
+
+        .status-active { background: #22c55e; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+
+        @keyframes statusBlink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .network-link {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #3182ce, #38b2ac, #3182ce);
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(49, 130, 206, 0.3);
+            z-index: 1;
+        }
+
+        .network-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 20px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            border-radius: 2px;
+            animation: dataFlow 2s linear infinite;
+        }
+
+        @keyframes dataFlow {
+            0% { transform: translateX(-20px); }
+            100% { transform: translateX(calc(100% + 20px)); }
+        }
+
+        .link-info {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .network-link:hover .link-info {
+            opacity: 1;
+        }
+
+        /* 链路详情表格 */
+        .detail-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(0, 0, 0, 0.03);
+            font-weight: 600;
+            font-size: 12px;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-normal { background: #38a169; }
+        .status-warning { background: #d69e2e; }
+        .status-error { background: #e53e3e; }
+
+        /* 性能历史对比 */
+        .performance-comparison {
+            padding: 20px;
+        }
+
+        .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .comparison-metric {
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .comparison-values {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .comparison-current {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .comparison-previous {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .comparison-change {
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .change-positive { color: #38a169; }
+        .change-negative { color: #e53e3e; }
+
+        .comparison-progress {
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .main-monitoring-section {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .network-kpi-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .detail-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            DDosSeek
+        </div>
+        <div class="user-section">
+            <i class="fas fa-bell" style="cursor: pointer; color: #faad14;"></i>
+            <div class="user-avatar">A</div>
+            <span>管理员</span>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i>系统仪表盘</a></li>
+            <li><a href="network-monitor.html" class="active"><i class="fas fa-network-wired"></i>网络监测中心</a></li>
+            <li><a href="ddos-detection.html"><i class="fas fa-shield-virus"></i>DDoS检测防护</a></li>
+            <li><a href="firewall-management.html"><i class="fas fa-fire-extinguisher"></i>防火墙管理</a></li>
+            <li><a href="log-center.html"><i class="fas fa-file-alt"></i>智能日志中心</a></li>
+            <li><a href="deepseek-assistant.html"><i class="fas fa-robot"></i>DeepSeek AI助手</a></li>
+            <li><a href="rule-config.html"><i class="fas fa-cogs"></i>规则配置中心</a></li>
+            <li><a href="system-test.html"><i class="fas fa-vial"></i>系统测试平台</a></li>
+        </ul>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" style="margin-bottom: 16px; font-size: 12px; color: #718096;">
+            <span><i class="fas fa-home"></i> 首页</span>
+            <span style="margin: 0 8px;">/</span>
+            <span><a href="dashboard.html" style="color: #718096; text-decoration: none;">系统仪表盘</a></span>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #3182ce; font-weight: 500;">网络监测中心</span>
+        </nav>
+
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <div class="page-title">
+                <i class="fas fa-network-wired"></i>
+                网络监测中心
+            </div>
+            <div class="refresh-controls">
+                <div class="refresh-btn" onclick="refreshData()">
+                    <i class="fas fa-sync"></i> 刷新数据
+                </div>
+                <div class="refresh-btn">
+                    <i class="fas fa-download"></i> 导出报告
+                </div>
+            </div>
+        </div>
+
+        <!-- 网络KPI指标区域 -->
+        <section class="network-kpi-section">
+            <div class="network-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">总带宽容量</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #1890ff, #40a9ff);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #1890ff;">2.5<span class="kpi-unit">Gbps</span></div>
+                    <div class="kpi-change positive">+5.2%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">当前利用率 72%</div>
+                    <div class="kpi-status">
+                        <span class="kpi-trend-indicator status-normal"></span>
+                        <span>正常</span>
+                    </div>
+                </div>
+                <div class="kpi-mini-chart">
+                    <div class="kpi-mini-chart-fill" style="--fill-width: 72%; background: linear-gradient(90deg, #1890ff, #40a9ff);"></div>
+                </div>
+            </div>
+
+            <div class="network-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">平均时延</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #52c41a, #73d13d);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #52c41a;">8.2<span class="kpi-unit">ms</span></div>
+                    <div class="kpi-change positive">-12%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">RTT 延迟优化</div>
+                    <div class="kpi-status">
+                        <span class="kpi-trend-indicator status-normal"></span>
+                        <span>优秀</span>
+                    </div>
+                </div>
+                <div class="kpi-mini-chart">
+                    <div class="kpi-mini-chart-fill" style="--fill-width: 88%; background: linear-gradient(90deg, #52c41a, #73d13d);"></div>
+                </div>
+            </div>
+
+            <div class="network-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">丢包率</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #faad14, #ffc53d);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #faad14;">0.03<span class="kpi-unit">%</span></div>
+                    <div class="kpi-change negative">+0.01%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">质量监控中</div>
+                    <div class="kpi-status">
+                        <span class="kpi-trend-indicator status-warning"></span>
+                        <span>警告</span>
+                    </div>
+                </div>
+                <div class="kpi-mini-chart">
+                    <div class="kpi-mini-chart-fill" style="--fill-width: 15%; background: linear-gradient(90deg, #faad14, #ffc53d);"></div>
+                </div>
+            </div>
+
+            <div class="network-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">活跃节点</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #722ed1, #9254de);">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #722ed1;">24<span class="kpi-unit">个</span></div>
+                    <div class="kpi-change positive">+3</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">总节点 28 个</div>
+                    <div class="kpi-status">
+                        <span class="kpi-trend-indicator status-normal"></span>
+                        <span>在线</span>
+                    </div>
+                </div>
+                <div class="kpi-mini-chart">
+                    <div class="kpi-mini-chart-fill" style="--fill-width: 86%; background: linear-gradient(90deg, #722ed1, #9254de);"></div>
+                </div>
+            </div>
+
+            <div class="network-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">实时吞吐量</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #13c2c2, #36cfc9);">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #13c2c2;">1.8<span class="kpi-unit">Gbps</span></div>
+                    <div class="kpi-change positive">+8.5%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">峰值 2.1 Gbps</div>
+                    <div class="kpi-status">
+                        <span class="kpi-trend-indicator status-normal"></span>
+                        <span>稳定</span>
+                    </div>
+                </div>
+                <div class="kpi-mini-chart">
+                    <div class="kpi-mini-chart-fill" style="--fill-width: 65%; background: linear-gradient(90deg, #13c2c2, #36cfc9);"></div>
+                </div>
+            </div>
+
+            <div class="network-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">连接质量</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #f759ab, #ff85c0);">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #f759ab;">96.8<span class="kpi-unit">%</span></div>
+                    <div class="kpi-change positive">+2.1%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">链路健康度</div>
+                    <div class="kpi-status">
+                        <span class="kpi-trend-indicator status-normal"></span>
+                        <span>良好</span>
+                    </div>
+                </div>
+                <div class="kpi-mini-chart">
+                    <div class="kpi-mini-chart-fill" style="--fill-width: 97%; background: linear-gradient(90deg, #f759ab, #ff85c0);"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主监控区域 -->
+        <section class="main-monitoring-section">
+            <!-- 实时时延监控 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">实时时延监控</div>
+                        <div class="panel-subtitle">各节点时延趋势</div>
+                    </div>
+                </div>
+                <div id="latencyChart" style="height: 320px;"></div>
+            </div>
+
+            <!-- 网络拓扑图 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">网络拓扑状态</div>
+                        <div class="panel-subtitle">SDN网络架构</div>
+                    </div>
+                </div>
+                <div class="topology-container">
+                    <!-- SDN控制器 -->
+                    <div class="network-node node-controller" data-info="CPU: 45% | RAM: 67% | 连接: 24">
+                        <i class="fas fa-brain"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    
+                    <!-- 核心交换机 -->
+                    <div class="network-node node-switch" style="top: 130px; left: 25%;" data-info="端口: 48/48 | 负载: 67% | 状态: 正常">
+                        <i class="fas fa-server"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    <div class="network-node node-switch" style="top: 130px; left: 75%;" data-info="端口: 48/48 | 负载: 82% | 状态: 繁忙">
+                        <i class="fas fa-server"></i>
+                        <div class="node-status status-warning"></div>
+                    </div>
+                    
+                    <!-- 接入交换机 -->
+                    <div class="network-node node-switch" style="top: 240px; left: 15%;" data-info="端口: 24/24 | 负载: 45% | 状态: 正常">
+                        <i class="fas fa-hdd"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    <div class="network-node node-switch" style="top: 240px; left: 50%;" data-info="端口: 24/24 | 负载: 89% | 状态: 高负载">
+                        <i class="fas fa-hdd"></i>
+                        <div class="node-status status-warning"></div>
+                    </div>
+                    <div class="network-node node-switch" style="top: 240px; left: 85%;" data-info="端口: 24/24 | 负载: 23% | 状态: 正常">
+                        <i class="fas fa-hdd"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    
+                    <!-- 服务器节点 -->
+                    <div class="network-node node-host" style="top: 320px; left: 5%;" data-info="Web服务器 | CPU: 34% | 连接: 156">
+                        <i class="fas fa-desktop"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    <div class="network-node node-host" style="top: 320px; left: 25%;" data-info="数据库服务器 | CPU: 78% | 连接: 89">
+                        <i class="fas fa-database"></i>
+                        <div class="node-status status-warning"></div>
+                    </div>
+                    <div class="network-node node-host" style="top: 320px; left: 45%;" data-info="应用服务器 | CPU: 56% | 连接: 234">
+                        <i class="fas fa-cloud"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    <div class="network-node node-host" style="top: 320px; left: 65%;" data-info="缓存服务器 | CPU: 23% | 连接: 67">
+                        <i class="fas fa-memory"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    <div class="network-node node-host" style="top: 320px; left: 85%;" data-info="监控服务器 | CPU: 45% | 连接: 34">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    <div class="network-node node-host" style="top: 320px; left: 95%;" data-info="备份服务器 | CPU: 12% | 连接: 8">
+                        <i class="fas fa-save"></i>
+                        <div class="node-status status-active"></div>
+                    </div>
+                    
+                    <!-- 控制器到核心交换机的连接 -->
+                    <div class="network-link" style="top: 88px; left: 42%; width: 16%; transform: rotate(25deg);">
+                        <div class="link-info">1Gbps 控制通道</div>
+                    </div>
+                    <div class="network-link" style="top: 88px; left: 58%; width: 16%; transform: rotate(-25deg);">
+                        <div class="link-info">1Gbps 控制通道</div>
+                    </div>
+                    
+                    <!-- 核心交换机之间的连接 -->
+                    <div class="network-link" style="top: 153px; left: 33%; width: 42%;">
+                        <div class="link-info">10Gbps 主干链路</div>
+                    </div>
+                    
+                    <!-- 核心到接入交换机的连接 -->
+                    <div class="network-link" style="top: 178px; left: 20%; width: 15%; transform: rotate(65deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    <div class="network-link" style="top: 178px; left: 37%; width: 20%; transform: rotate(35deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    <div class="network-link" style="top: 178px; left: 67%; width: 20%; transform: rotate(-35deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    <div class="network-link" style="top: 178px; left: 80%; width: 15%; transform: rotate(-65deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    
+                    <!-- 接入交换机到服务器的连接 -->
+                    <div class="network-link" style="top: 288px; left: 5%; width: 12%; transform: rotate(85deg);">
+                        <div class="link-info">100Mbps</div>
+                    </div>
+                    <div class="network-link" style="top: 288px; left: 20%; width: 8%; transform: rotate(85deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    <div class="network-link" style="top: 288px; left: 47%; width: 8%; transform: rotate(85deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    <div class="network-link" style="top: 288px; left: 62%; width: 25%; transform: rotate(65deg);">
+                        <div class="link-info">1Gbps</div>
+                    </div>
+                    <div class="network-link" style="top: 288px; left: 85%; width: 12%; transform: rotate(85deg);">
+                        <div class="link-info">100Mbps</div>
+                    </div>
+                    <div class="network-link" style="top: 288px; left: 92%; width: 8%; transform: rotate(85deg);">
+                        <div class="link-info">100Mbps</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 带宽使用统计 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">带宽使用统计</div>
+                        <div class="panel-subtitle">实时占用情况</div>
+                    </div>
+                </div>
+                <div id="bandwidthChart" style="height: 320px;"></div>
+            </div>
+        </section>
+
+        <!-- 详细信息区域 -->
+        <section class="detail-section">
+            <!-- 链路详情表格 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div class="panel-title">链路状态详情</div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>链路名称</th>
+                            <th>类型</th>
+                            <th>状态</th>
+                            <th>带宽</th>
+                            <th>时延</th>
+                            <th>利用率</th>
+                            <th>丢包率</th>
+                            <th>质量评分</th>
+                            <th>最后更新</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Controller-Core1</strong></td>
+                            <td><span style="color: #722ed1; font-size: 11px;">控制通道</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>1Gbps</td>
+                            <td>2.1ms</td>
+                            <td>45%</td>
+                            <td>0.01%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">95</span></td>
+                            <td>刚刚</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Controller-Core2</strong></td>
+                            <td><span style="color: #722ed1; font-size: 11px;">控制通道</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>1Gbps</td>
+                            <td>2.3ms</td>
+                            <td>52%</td>
+                            <td>0.02%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">94</span></td>
+                            <td>1秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Core1-Core2</strong></td>
+                            <td><span style="color: #1890ff; font-size: 11px;">主干链路</span></td>
+                            <td><span class="status-indicator status-warning"></span>繁忙</td>
+                            <td>10Gbps</td>
+                            <td>0.8ms</td>
+                            <td>87%</td>
+                            <td>0.15%</td>
+                            <td><span style="color: #faad14; font-weight: 600;">78</span></td>
+                            <td>2秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Core1-Access1</strong></td>
+                            <td><span style="color: #13c2c2; font-size: 11px;">上行链路</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>1Gbps</td>
+                            <td>1.2ms</td>
+                            <td>63%</td>
+                            <td>0.03%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">89</span></td>
+                            <td>3秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Core2-Access2</strong></td>
+                            <td><span style="color: #13c2c2; font-size: 11px;">上行链路</span></td>
+                            <td><span class="status-indicator status-warning"></span>高负载</td>
+                            <td>1Gbps</td>
+                            <td>3.4ms</td>
+                            <td>89%</td>
+                            <td>0.08%</td>
+                            <td><span style="color: #faad14; font-weight: 600;">76</span></td>
+                            <td>1秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access1-WebServer</strong></td>
+                            <td><span style="color: #52c41a; font-size: 11px;">接入链路</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>100Mbps</td>
+                            <td>0.5ms</td>
+                            <td>28%</td>
+                            <td>0.00%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">98</span></td>
+                            <td>2秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access1-DatabaseSvr</strong></td>
+                            <td><span style="color: #52c41a; font-size: 11px;">接入链路</span></td>
+                            <td><span class="status-indicator status-warning"></span>高流量</td>
+                            <td>1Gbps</td>
+                            <td>1.1ms</td>
+                            <td>78%</td>
+                            <td>0.05%</td>
+                            <td><span style="color: #faad14; font-weight: 600;">82</span></td>
+                            <td>1秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access2-AppServer</strong></td>
+                            <td><span style="color: #52c41a; font-size: 11px;">接入链路</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>1Gbps</td>
+                            <td>0.9ms</td>
+                            <td>56%</td>
+                            <td>0.02%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">91</span></td>
+                            <td>刚刚</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access3-CacheServer</strong></td>
+                            <td><span style="color: #52c41a; font-size: 11px;">接入链路</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>1Gbps</td>
+                            <td>0.7ms</td>
+                            <td>23%</td>
+                            <td>0.01%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">96</span></td>
+                            <td>2秒前</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access3-MonitorSvr</strong></td>
+                            <td><span style="color: #52c41a; font-size: 11px;">接入链路</span></td>
+                            <td><span class="status-indicator status-normal"></span>正常</td>
+                            <td>100Mbps</td>
+                            <td>1.0ms</td>
+                            <td>45%</td>
+                            <td>0.00%</td>
+                            <td><span style="color: #52c41a; font-weight: 600;">97</span></td>
+                            <td>3秒前</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 性能历史对比 -->
+            <div class="performance-comparison glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">性能历史对比</div>
+                        <div class="panel-subtitle">过去24小时趋势分析</div>
+                    </div>
+                </div>
+                
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-clock" style="color: #52c41a; margin-right: 8px;"></i>
+                        平均时延
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">8.2ms</div>
+                        <div class="comparison-previous">vs 昨日 9.1ms</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-down"></i> -9.9%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(82, 196, 26, 0.2);">
+                            <div style="width: 78%; height: 100%; background: #52c41a; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-arrows-alt-h" style="color: #13c2c2; margin-right: 8px;"></i>
+                        总吞吐量
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">1.8Gbps</div>
+                        <div class="comparison-previous">vs 昨日 1.6Gbps</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-up"></i> +12.5%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(19, 194, 194, 0.2);">
+                            <div style="width: 72%; height: 100%; background: #13c2c2; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-exclamation-triangle" style="color: #faad14; margin-right: 8px;"></i>
+                        丢包率
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">0.03%</div>
+                        <div class="comparison-previous">vs 昨日 0.02%</div>
+                        <div class="comparison-change change-negative">
+                            <i class="fas fa-arrow-up"></i> +50%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(250, 173, 20, 0.2);">
+                            <div style="width: 15%; height: 100%; background: #faad14; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-network-wired" style="color: #722ed1; margin-right: 8px;"></i>
+                        活跃连接数
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">24</div>
+                        <div class="comparison-previous">vs 昨日 22</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-up"></i> +9.1%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(114, 46, 209, 0.2);">
+                            <div style="width: 86%; height: 100%; background: #722ed1; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-shield-alt" style="color: #1890ff; margin-right: 8px;"></i>
+                        网络质量评分
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">91.5</div>
+                        <div class="comparison-previous">vs 昨日 89.2</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-up"></i> +2.6%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(24, 144, 255, 0.2);">
+                            <div style="width: 92%; height: 100%; background: #1890ff; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-bug" style="color: #f759ab; margin-right: 8px;"></i>
+                        异常事件
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">3</div>
+                        <div class="comparison-previous">vs 昨日 5</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-down"></i> -40%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(247, 89, 171, 0.2);">
+                            <div style="width: 30%; height: 100%; background: #f759ab; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-tachometer-alt" style="color: #52c41a; margin-right: 8px;"></i>
+                        带宽利用率
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">72%</div>
+                        <div class="comparison-previous">vs 昨日 68%</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-up"></i> +5.9%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(82, 196, 26, 0.2);">
+                            <div style="width: 72%; height: 100%; background: #52c41a; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-metric">
+                        <i class="fas fa-sync-alt" style="color: #13c2c2; margin-right: 8px;"></i>
+                        系统可用性
+                    </div>
+                    <div class="comparison-values">
+                        <div class="comparison-current">99.97%</div>
+                        <div class="comparison-previous">vs 昨日 99.94%</div>
+                        <div class="comparison-change change-positive">
+                            <i class="fas fa-arrow-up"></i> +0.03%
+                        </div>
+                    </div>
+                    <div class="comparison-progress">
+                        <div class="progress-bar" style="height: 4px; background: rgba(19, 194, 194, 0.2);">
+                            <div style="width: 100%; height: 100%; background: #13c2c2; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 实时时延监控图表
+        const latencyChart = echarts.init(document.getElementById('latencyChart'));
+        const latencyOption = {
+            backgroundColor: 'transparent',
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: ['10:00', '10:05', '10:10', '10:15', '10:20', '10:25', '10:30'],
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.3)' }},
+                axisLabel: { color: '#4a5568', fontSize: 11 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.3)' }},
+                axisLabel: { color: '#4a5568', fontSize: 11 },
+                splitLine: { lineStyle: { color: 'rgba(0,0,0,0.1)' }}
+            },
+            series: [
+                {
+                    name: 'S1节点',
+                    type: 'line',
+                    data: [2.1, 2.3, 2.0, 2.5, 2.2, 2.4, 2.1],
+                    smooth: true,
+                    lineStyle: { color: '#38a169', width: 2 },
+                    itemStyle: { color: '#38a169' }
+                },
+                {
+                    name: 'S2节点',
+                    type: 'line',
+                    data: [2.3, 2.1, 2.4, 2.2, 2.6, 2.3, 2.3],
+                    smooth: true,
+                    lineStyle: { color: '#3182ce', width: 2 },
+                    itemStyle: { color: '#3182ce' }
+                },
+                {
+                    name: 'S3节点',
+                    type: 'line',
+                    data: [15.1, 15.8, 14.9, 16.2, 15.6, 15.3, 15.6],
+                    smooth: true,
+                    lineStyle: { color: '#d69e2e', width: 2 },
+                    itemStyle: { color: '#d69e2e' }
+                }
+            ]
+        };
+        latencyChart.setOption(latencyOption);
+
+        // 带宽使用统计图表
+        const bandwidthChart = echarts.init(document.getElementById('bandwidthChart'));
+        const bandwidthOption = {
+            backgroundColor: 'transparent',
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: ['S1', 'S2', 'S3', 'H1', 'H2', 'H3', 'H4'],
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.3)' }},
+                axisLabel: { color: '#4a5568', fontSize: 11 }
+            },
+            yAxis: {
+                type: 'value',
+                max: 100,
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.3)' }},
+                axisLabel: { 
+                    color: '#4a5568', 
+                    fontSize: 11,
+                    formatter: '{value}%'
+                },
+                splitLine: { lineStyle: { color: 'rgba(0,0,0,0.1)' }}
+            },
+            series: [
+                {
+                    type: 'bar',
+                    data: [
+                        {value: 45, itemStyle: {color: '#38a169'}},
+                        {value: 52, itemStyle: {color: '#38a169'}},
+                        {value: 87, itemStyle: {color: '#d69e2e'}},
+                        {value: 28, itemStyle: {color: '#38a169'}},
+                        {value: 34, itemStyle: {color: '#38a169'}},
+                        {value: 41, itemStyle: {color: '#38a169'}},
+                        {value: 39, itemStyle: {color: '#38a169'}}
+                    ],
+                    barWidth: '60%'
+                }
+            ]
+        };
+        bandwidthChart.setOption(bandwidthOption);
+
+        // 响应式图表调整
+        window.addEventListener('resize', function() {
+            latencyChart.resize();
+            bandwidthChart.resize();
+        });
+
+        // 模拟实时数据更新
+        function updateCharts() {
+            // 更新时延数据
+            const newLatencyData = [
+                Array.from({length: 7}, () => Math.floor(Math.random() * 1 + 2)),
+                Array.from({length: 7}, () => Math.floor(Math.random() * 1 + 2.2)),
+                Array.from({length: 7}, () => Math.floor(Math.random() * 2 + 15))
+            ];
+            
+            latencyChart.setOption({
+                series: [
+                    { data: newLatencyData[0] },
+                    { data: newLatencyData[1] },
+                    { data: newLatencyData[2] }
+                ]
+            });
+
+            // 更新带宽数据
+            const newBandwidthData = Array.from({length: 7}, () => ({
+                value: Math.floor(Math.random() * 30 + 30),
+                itemStyle: {color: Math.random() > 0.8 ? '#d69e2e' : '#38a169'}
+            }));
+            
+            bandwidthChart.setOption({
+                series: [{ data: newBandwidthData }]
+            });
+        }
+
+        // 刷新数据功能
+        function refreshData() {
+            updateCharts();
+            // 模拟KPI数据更新
+            document.querySelectorAll('.kpi-value-large').forEach(el => {
+                const currentValue = parseFloat(el.textContent);
+                const variance = currentValue * 0.05 * (Math.random() - 0.5);
+                el.textContent = (currentValue + variance).toFixed(1) + ' ';
+            });
+        }
+
+        // 模拟网络数据更新
+        function updateNetworkData() {
+            // 更新KPI数据
+            const kpiValues = document.querySelectorAll('.kpi-value-large');
+            if (kpiValues[0]) kpiValues[0].innerHTML = (Math.random() * 0.5 + 2.2).toFixed(1) + '<span class="kpi-unit">Gbps</span>';
+            if (kpiValues[1]) kpiValues[1].innerHTML = (Math.random() * 2 + 7.5).toFixed(1) + '<span class="kpi-unit">ms</span>';
+            if (kpiValues[2]) kpiValues[2].innerHTML = (Math.random() * 0.02 + 0.02).toFixed(3) + '<span class="kpi-unit">%</span>';
+            if (kpiValues[3]) kpiValues[3].innerHTML = Math.floor(Math.random() * 4 + 22) + '<span class="kpi-unit">个</span>';
+            if (kpiValues[4]) kpiValues[4].innerHTML = (Math.random() * 0.4 + 1.6).toFixed(1) + '<span class="kpi-unit">Gbps</span>';
+            if (kpiValues[5]) kpiValues[5].innerHTML = (Math.random() * 2 + 95.8).toFixed(1) + '<span class="kpi-unit">%</span>';
+
+            // 更新变化指示器
+            const changes = document.querySelectorAll('.kpi-change');
+            changes.forEach(change => {
+                const isPositive = Math.random() > 0.3;
+                const value = (Math.random() * 10 + 1).toFixed(1);
+                change.className = `kpi-change ${isPositive ? 'positive' : 'negative'}`;
+                change.textContent = `${isPositive ? '+' : '-'}${value}%`;
+            });
+
+            // 更新节点状态
+            const statusDots = document.querySelectorAll('.node-status');
+            statusDots.forEach(dot => {
+                const rand = Math.random();
+                if (rand < 0.7) {
+                    dot.className = 'node-status status-active';
+                } else if (rand < 0.9) {
+                    dot.className = 'node-status status-warning';
+                } else {
+                    dot.className = 'node-status status-error';
+                }
+            });
+
+            // 更新性能对比数据
+            const currentValues = document.querySelectorAll('.comparison-current');
+            const changeValues = document.querySelectorAll('.comparison-change');
+            
+            const metrics = [
+                { value: (Math.random() * 2 + 7.5).toFixed(1) + 'ms', trend: Math.random() > 0.5 },
+                { value: (Math.random() * 0.4 + 1.6).toFixed(1) + 'Gbps', trend: Math.random() > 0.3 },
+                { value: (Math.random() * 0.02 + 0.02).toFixed(3) + '%', trend: Math.random() > 0.6 },
+                { value: Math.floor(Math.random() * 4 + 22), trend: Math.random() > 0.4 },
+                { value: (Math.random() * 5 + 89).toFixed(1), trend: Math.random() > 0.4 },
+                { value: Math.floor(Math.random() * 3 + 2), trend: Math.random() > 0.7 },
+                { value: Math.floor(Math.random() * 10 + 68) + '%', trend: Math.random() > 0.3 },
+                { value: (Math.random() * 0.1 + 99.9).toFixed(2) + '%', trend: Math.random() > 0.2 }
+            ];
+
+            metrics.forEach((metric, index) => {
+                if (currentValues[index]) {
+                    currentValues[index].textContent = metric.value;
+                }
+                if (changeValues[index]) {
+                    const changePercent = (Math.random() * 10 + 1).toFixed(1);
+                    const icon = metric.trend ? 'fa-arrow-up' : 'fa-arrow-down';
+                    const sign = metric.trend ? '+' : '-';
+                    changeValues[index].className = `comparison-change ${metric.trend ? 'change-positive' : 'change-negative'}`;
+                    changeValues[index].innerHTML = `<i class="fas ${icon}"></i> ${sign}${changePercent}%`;
+                }
+            });
+        }
+
+        // 模拟网络事件通知
+        function simulateNetworkEvents() {
+            const events = [
+                '检测到链路 Core1-Core2 负载过高',
+                '数据库服务器连接数达到阈值',
+                '新节点 Access4 已上线',
+                '链路质量优化完成',
+                '系统自动切换到冗余路径',
+                '网络拓扑更新完成'
+            ];
+            
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            console.log(`网络事件: ${randomEvent}`);
+            
+            // 可以在这里添加通知UI
+            if (Math.random() > 0.8) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: rgba(24, 144, 255, 0.95);
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    z-index: 10000;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                notification.textContent = randomEvent;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 3000);
+            }
+        }
+
+        // 定时更新
+        setInterval(updateNetworkData, 6000);
+        setInterval(updateCharts, 12000);
+        setInterval(simulateNetworkEvents, 15000);
+
+        // 初始化路由管理器
+        const router = new DDosSeekRouter('network-monitor');
+
+        // 增强网络节点交互
+        document.querySelectorAll('.network-node').forEach(node => {
+            node.addEventListener('click', function() {
+                const info = this.getAttribute('data-info');
+                const nodeType = this.classList.contains('node-controller') ? 'SDN控制器' : 
+                               this.classList.contains('node-switch') ? '网络交换机' : '服务器节点';
+                
+                // 创建详细信息弹窗
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white;
+                    padding: 24px;
+                    border-radius: 12px;
+                    min-width: 300px;
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                `;
+                
+                content.innerHTML = `
+                    <h3 style="margin: 0 0 16px 0; color: #2d3748;">${nodeType}</h3>
+                    <p style="margin: 0 0 16px 0; color: #4a5568; line-height: 1.5;">${info}</p>
+                    <button onclick="this.parentNode.parentNode.remove()" 
+                            style="background: #3182ce; color: white; border: none; 
+                                   padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                        关闭
+                    </button>
+                `;
+                
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+            });
+        });
+
+        // 初始化数据
+        updateNetworkData();
+    </script>
+    <script src="router.js"></script>
+</body>
+</html> 
