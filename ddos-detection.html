@@ -138,7 +138,7 @@
     <div class="tech-background"></div>
 
     <!-- 返回按钮 -->
-    <a href="javascript:history.back()" class="back-button">
+    <a href="dashboard.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
         返回
     </a>
@@ -178,15 +178,10 @@
             `;
         });
 
-        // 返回按钮功能增强
+        // 返回按钮功能 - 固定返回到仪表板
         document.querySelector('.back-button').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                // 如果没有历史记录，尝试返回到仪表板
-                window.location.href = 'dashboard.html';
-            }
+            // 直接跳转到仪表板，不使用preventDefault，让链接正常工作
+            // 这里可以添加确认对话框或其他逻辑（如果需要）
         });
 
         // 响应式处理
