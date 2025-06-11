@@ -619,28 +619,22 @@
                     setLoadingState('login', true);
                     
                     setTimeout(() => {
-                        // 模拟登录验证
-                        if (username.value === 'admin' && password.value === 'admin123') {
-                            // 保存登录状态
-                            localStorage.setItem('ddosseek_logged_in', 'true');
-                            localStorage.setItem('ddosseek_login_time', new Date().getTime());
-                            
-                            const remember = document.getElementById('remember-me').checked;
-                            if (remember) {
-                                localStorage.setItem('ddosseek_remember', 'true');
-                                localStorage.setItem('ddosseek_username', username.value);
-                            }
-                            
-                            showMessage('登录成功，正在跳转...', 'success');
-                            
-                            setTimeout(() => {
-                                window.location.href = 'dashboard.html';
-                            }, 1500);
-                        } else {
-                            hideLoader();
-                            setLoadingState('login', false);
-                            showMessage('用户名或密码错误，请重试', 'error');
+                        // 模拟登录验证 - 无条件成功
+                        // 保存登录状态
+                        localStorage.setItem('ddosseek_logged_in', 'true');
+                        localStorage.setItem('ddosseek_login_time', new Date().getTime());
+                        
+                        const remember = document.getElementById('remember-me').checked;
+                        if (remember) {
+                            localStorage.setItem('ddosseek_remember', 'true');
+                            localStorage.setItem('ddosseek_username', username.value);
                         }
+                        
+                        showMessage('登录成功，正在跳转到DDoS检测防护系统...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'ddos-detection.html';
+                        }, 1500);
                     }, 1500);
                 }
             });
@@ -693,7 +687,7 @@
                     setTimeout(() => {
                         hideLoader();
                         setLoadingState('register', false);
-                        showMessage('注册申请已提交，请等待审核通过', 'success');
+                        showMessage('注册成功', 'success');
                         
                         // 切换到登录表单
                         setTimeout(() => {
