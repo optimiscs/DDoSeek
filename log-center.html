@@ -2236,12 +2236,12 @@
 
     <aside class="sidebar">
         <ul class="sidebar-menu">
+            <li><a href="ddos-detection.html"><i class="fas fa-shield-virus"></i>DDoS检测防护</a></li>
+            <li><a href="deepseek-assistant.html"><i class="fas fa-robot"></i>DeepSeek AI助手</a></li>
             <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i>系统仪表盘</a></li>
             <li><a href="network-monitor.html"><i class="fas fa-network-wired"></i>网络监测中心</a></li>
-            <li><a href="ddos-detection.html"><i class="fas fa-shield-virus"></i>DDoS检测防护</a></li>
             <li><a href="firewall-management.html"><i class="fas fa-fire-extinguisher"></i>防火墙管理</a></li>
             <li><a href="log-center.html" class="active"><i class="fas fa-file-alt"></i>智能日志中心</a></li>
-            <li><a href="deepseek-assistant.html"><i class="fas fa-robot"></i>DeepSeek AI助手</a></li>
             <li><a href="rule-config.html"><i class="fas fa-cogs"></i>规则配置中心</a></li>
             <li><a href="system-test.html"><i class="fas fa-vial"></i>系统测试平台</a></li>
         </ul>
@@ -2437,7 +2437,7 @@
                                 <i class="fas fa-sync"></i> 刷新
                             </button>
                         </div>
-                    </div>
+                </div>
 
                     <div class="toolbar-bottom">
                         <div class="search-section">
@@ -2453,8 +2453,8 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                        
+                </div>
+
                         <div class="search-controls">
                             <button class="filter-toggle-btn" onclick="toggleLogFilterPanel()" id="logFilterToggleBtn">
                                 <i class="fas fa-sliders-h"></i>
@@ -2462,9 +2462,9 @@
                                 <i class="fas fa-chevron-down filter-toggle-icon"></i>
                                 <span class="filter-count-badge" id="logFilterCountBadge" style="display: none;">0</span>
                             </button>
-                        </div>
                     </div>
-                    
+                </div>
+
                     <!-- 可折叠的筛选面板 -->
                     <div class="filter-chips-container" id="logFilterPanel">
                         <div class="filter-chip">
@@ -2483,15 +2483,15 @@
                             <i class="fas fa-server"></i>
                             <select id="sourceFilter">
                                 <option value="">所有来源</option>
-                                <option value="firewall">防火墙系统</option>
-                                <option value="ddos">DDoS检测引擎</option>
-                                <option value="network">网络监控中心</option>
-                                <option value="system">系统核心服务</option>
-                                <option value="auth">用户认证服务</option>
-                                <option value="database">数据库服务</option>
-                                <option value="proxy">代理服务器</option>
-                                <option value="vpn">VPN网关</option>
-                                <option value="api">API接口</option>
+                        <option value="firewall">防火墙系统</option>
+                        <option value="ddos">DDoS检测引擎</option>
+                        <option value="network">网络监控中心</option>
+                        <option value="system">系统核心服务</option>
+                        <option value="auth">用户认证服务</option>
+                        <option value="database">数据库服务</option>
+                        <option value="proxy">代理服务器</option>
+                        <option value="vpn">VPN网关</option>
+                        <option value="api">API接口</option>
                                 <option value="security">安全审计系统</option>
                                 <option value="cache">缓存服务</option>
                                 <option value="mail">邮件服务</option>
@@ -2502,21 +2502,21 @@
                                 <option value="dns">DNS服务</option>
                                 <option value="scheduler">任务调度器</option>
                                 <option value="certificate">证书管理</option>
-                            </select>
-                        </div>
-                        
+                    </select>
+                </div>
+
                         <div class="filter-chip">
                             <i class="fas fa-clock"></i>
                             <select id="timeRangeFilter">
                                 <option value="">所有时间</option>
-                                <option value="5m">最近5分钟</option>
-                                <option value="1h">最近1小时</option>
-                                <option value="6h">最近6小时</option>
-                                <option value="24h" selected>最近24小时</option>
-                                <option value="7d">最近7天</option>
-                            </select>
-                        </div>
-                    
+                        <option value="5m">最近5分钟</option>
+                        <option value="1h">最近1小时</option>
+                        <option value="6h">最近6小时</option>
+                        <option value="24h" selected>最近24小时</option>
+                        <option value="7d">最近7天</option>
+                    </select>
+                </div>
+
                         <div class="action-buttons-group">
                             <button class="modern-btn primary" onclick="performLogSearch()">
                                 <i class="fas fa-filter"></i> 应用筛选
@@ -2524,10 +2524,10 @@
                             <button class="modern-btn outline" onclick="resetLogFilters()">
                                 <i class="fas fa-undo"></i> 重置
                             </button>
-                        </div>
                     </div>
                 </div>
-                
+            </div>
+
                 <!-- 现代化统计卡片 -->
                 <div class="stats-cards-container">
                     <div class="stats-cards">
@@ -2535,34 +2535,34 @@
                             <div class="stats-icon"><i class="fas fa-file-text"></i></div>
                             <div class="stats-label">总日志数</div>
                             <div class="stats-value" id="totalLogs">24,567</div>
-                        </div>
+                    </div>
                         <div class="stats-card visible">
                             <div class="stats-icon"><i class="fas fa-eye"></i></div>
                             <div class="stats-label">当前显示</div>
                             <div class="stats-value" id="visibleLogs">24,567</div>
-                        </div>
+                </div>
                         <div class="stats-card info">
                             <div class="stats-icon"><i class="fas fa-info-circle"></i></div>
                             <div class="stats-label">信息日志</div>
                             <div class="stats-value" id="infoLogs">18,456</div>
-                        </div>
+                    </div>
                         <div class="stats-card warning">
                             <div class="stats-icon"><i class="fas fa-exclamation-triangle"></i></div>
                             <div class="stats-label">警告日志</div>
                             <div class="stats-value" id="warningLogs">4,523</div>
-                        </div>
+                    </div>
                         <div class="stats-card error">
                             <div class="stats-icon"><i class="fas fa-times-circle"></i></div>
                             <div class="stats-label">错误日志</div>
                             <div class="stats-value" id="errorLogs">1,356</div>
-                        </div>
+                    </div>
                         <div class="stats-card debug">
                             <div class="stats-icon"><i class="fas fa-bug"></i></div>
                             <div class="stats-label">调试日志</div>
                             <div class="stats-value" id="debugLogs">232</div>
-                        </div>
                     </div>
-                </div>
+                    </div>
+                    </div>
                     
                 <!-- 现代化表格 -->
                 <div class="modern-table-container">
@@ -2574,25 +2574,25 @@
                                         <div class="th-content">
                                             时间戳
                                             <i class="fas fa-sort sort-icon"></i>
-                                        </div>
+                    </div>
                                     </th>
                                     <th class="sortable" data-sort="level">
                                         <div class="th-content">
                                             级别
                                             <i class="fas fa-sort sort-icon"></i>
-                                        </div>
+                    </div>
                                     </th>
                                     <th class="sortable" data-sort="source">
                                         <div class="th-content">
                                             来源
                                             <i class="fas fa-sort sort-icon"></i>
-                                        </div>
+                    </div>
                                     </th>
                                     <th class="sortable" data-sort="message">
                                         <div class="th-content">
                                             日志内容
                                             <i class="fas fa-sort sort-icon"></i>
-                                        </div>
+                    </div>
                                     </th>
                                     <th class="sortable" data-sort="ip">
                                         <div class="th-content">
@@ -2629,7 +2629,7 @@
                         <span class="ai-cards-counter">
                             <span id="aiCurrentCard">1</span> / <span id="aiTotalCards">6</span>
                         </span>
-                    </div>
+                </div>
                     <div class="ai-navigation">
                         <button class="ai-nav-btn ai-prev-btn" onclick="previousAICard()" id="aiPrevBtn">
                             <i class="fas fa-chevron-left"></i>
@@ -2648,23 +2648,23 @@
                                 <i class="fas fa-fire"></i>
                                 <span>紧急</span>
                             </div>
-                            <div class="insight-header">
-                                <div class="insight-title">
-                                    <div class="insight-icon" style="background: linear-gradient(135deg, #e53e3e, #f56565);">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                    </div>
+                    <div class="insight-header">
+                        <div class="insight-title">
+                            <div class="insight-icon" style="background: linear-gradient(135deg, #e53e3e, #f56565);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
                                     <div class="title-content">
                                         <h3>异常检测告警</h3>
                                         <p class="title-subtitle">安全威胁分析</p>
                                     </div>
-                                </div>
-                                <div class="insight-score score-critical">
+                        </div>
+                        <div class="insight-score score-critical">
                                     <div class="score-icon"><i class="fas fa-fire"></i></div>
                                     <div class="score-text">
                                         <span class="score-level">高危</span>
                                         <span class="score-value">9.2/10</span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                             <div class="insight-desc">
                                 <div class="threat-details">
@@ -2689,20 +2689,20 @@
                                 </div>
                                 <p class="threat-description">检测到来自该IP的异常访问模式，包括频繁的认证失败和端口扫描行为。建议立即采取防护措施。</p>
                             </div>
-                            <div class="insight-meta">
+                    <div class="insight-meta">
                                 <div class="meta-info">
                                     <span><i class="fas fa-clock"></i> 检测时间：2分钟前</span>
                                     <span><i class="fas fa-shield-alt"></i> 自动阻断：已启用</span>
                                 </div>
                                 <div class="confidence-container">
-                                    <span>置信度:</span>
-                                    <div class="confidence-bar">
-                                        <div class="confidence-fill" style="--confidence-width: 98%;"></div>
-                                    </div>
-                                    <span class="confidence-value">98%</span>
-                                </div>
+                            <span>置信度:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="--confidence-width: 98%;"></div>
                             </div>
-                            <div class="insight-actions">
+                                    <span class="confidence-value">98%</span>
+                        </div>
+                    </div>
+                    <div class="insight-actions">
                                 <button class="insight-btn btn-apply primary">
                                     <i class="fas fa-ban"></i> 立即阻断
                                 </button>
@@ -2712,8 +2712,8 @@
                                 <button class="insight-btn btn-dismiss">
                                     <i class="fas fa-times"></i> 忽略
                                 </button>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         <div class="ai-insight-card warning" data-card="2">
                             <div class="card-background-pattern"></div>
@@ -2721,23 +2721,23 @@
                                 <i class="fas fa-exclamation-triangle"></i>
                                 <span>警告</span>
                             </div>
-                            <div class="insight-header">
-                                <div class="insight-title">
-                                    <div class="insight-icon" style="background: linear-gradient(135deg, #d69e2e, #f6ad55);">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
+                    <div class="insight-header">
+                        <div class="insight-title">
+                            <div class="insight-icon" style="background: linear-gradient(135deg, #d69e2e, #f6ad55);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
                                     <div class="title-content">
                                         <h3>性能趋势预警</h3>
                                         <p class="title-subtitle">系统负载分析</p>
                                     </div>
-                                </div>
-                                <div class="insight-score score-warning">
+                        </div>
+                        <div class="insight-score score-warning">
                                     <div class="score-icon"><i class="fas fa-exclamation"></i></div>
                                     <div class="score-text">
                                         <span class="score-level">警告</span>
                                         <span class="score-value">7.5/10</span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                             <div class="insight-desc">
                                 <div class="performance-metrics">
@@ -2756,20 +2756,20 @@
                                 </div>
                                 <p class="performance-description">系统负载呈现异常上升趋势，可能存在性能瓶颈或资源不足问题。</p>
                             </div>
-                            <div class="insight-meta">
+                    <div class="insight-meta">
                                 <div class="meta-info">
                                     <span><i class="fas fa-database"></i> 预测基于：48小时历史数据</span>
                                     <span><i class="fas fa-chart-area"></i> 预测模型：ARIMA</span>
                                 </div>
                                 <div class="confidence-container">
-                                    <span>置信度:</span>
-                                    <div class="confidence-bar">
-                                        <div class="confidence-fill" style="--confidence-width: 85%;"></div>
-                                    </div>
-                                    <span class="confidence-value">85%</span>
-                                </div>
+                            <span>置信度:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="--confidence-width: 85%;"></div>
                             </div>
-                            <div class="insight-actions">
+                                    <span class="confidence-value">85%</span>
+                        </div>
+                    </div>
+                    <div class="insight-actions">
                                 <button class="insight-btn btn-apply primary">
                                     <i class="fas fa-server"></i> 扩容资源
                                 </button>
@@ -2779,8 +2779,8 @@
                                 <button class="insight-btn btn-dismiss">
                                     <i class="fas fa-clock"></i> 稍后处理
                                 </button>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         <div class="ai-insight-card info" data-card="3">
                             <div class="card-background-pattern"></div>
@@ -2788,23 +2788,23 @@
                                 <i class="fas fa-lightbulb"></i>
                                 <span>建议</span>
                             </div>
-                            <div class="insight-header">
-                                <div class="insight-title">
-                                    <div class="insight-icon" style="background: linear-gradient(135deg, #3182ce, #63b3ed);">
-                                        <i class="fas fa-shield-alt"></i>
-                                    </div>
+                    <div class="insight-header">
+                        <div class="insight-title">
+                            <div class="insight-icon" style="background: linear-gradient(135deg, #3182ce, #63b3ed);">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
                                     <div class="title-content">
                                         <h3>安全策略建议</h3>
                                         <p class="title-subtitle">防护优化方案</p>
                                     </div>
-                                </div>
-                                <div class="insight-score score-info">
+                        </div>
+                        <div class="insight-score score-info">
                                     <div class="score-icon"><i class="fas fa-lightbulb"></i></div>
                                     <div class="score-text">
                                         <span class="score-level">建议</span>
                                         <span class="score-value">8.1/10</span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                             <div class="insight-desc">
                                 <div class="security-analysis">
@@ -2823,20 +2823,20 @@
                                 </div>
                                 <p class="security-description">建议启用智能频率限制和IP白名单机制，有效减少恶意访问尝试和API滥用。</p>
                             </div>
-                            <div class="insight-meta">
+                    <div class="insight-meta">
                                 <div class="meta-info">
                                     <span><i class="fas fa-history"></i> 基于：7天安全事件分析</span>
                                     <span><i class="fas fa-robot"></i> AI模型：SecurityGuard v2.1</span>
                                 </div>
                                 <div class="confidence-container">
-                                    <span>置信度:</span>
-                                    <div class="confidence-bar">
-                                        <div class="confidence-fill" style="--confidence-width: 92%;"></div>
-                                    </div>
-                                    <span class="confidence-value">92%</span>
-                                </div>
+                            <span>置信度:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="--confidence-width: 92%;"></div>
                             </div>
-                            <div class="insight-actions">
+                                    <span class="confidence-value">92%</span>
+                        </div>
+                    </div>
+                    <div class="insight-actions">
                                 <button class="insight-btn btn-apply primary">
                                     <i class="fas fa-shield-check"></i> 启用策略
                                 </button>
@@ -2846,8 +2846,8 @@
                                 <button class="insight-btn btn-dismiss">
                                     <i class="fas fa-pause"></i> 暂不执行
                                 </button>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         <div class="ai-insight-card warning" data-card="4">
                             <div class="card-background-pattern"></div>
@@ -2855,23 +2855,23 @@
                                 <i class="fas fa-hdd"></i>
                                 <span>容量</span>
                             </div>
-                            <div class="insight-header">
-                                <div class="insight-title">
-                                    <div class="insight-icon" style="background: linear-gradient(135deg, #805ad5, #b794f6);">
-                                        <i class="fas fa-database"></i>
-                                    </div>
+                    <div class="insight-header">
+                        <div class="insight-title">
+                            <div class="insight-icon" style="background: linear-gradient(135deg, #805ad5, #b794f6);">
+                                <i class="fas fa-database"></i>
+                            </div>
                                     <div class="title-content">
                                         <h3>存储容量优化</h3>
                                         <p class="title-subtitle">空间管理建议</p>
                                     </div>
-                                </div>
-                                <div class="insight-score score-warning">
+                        </div>
+                        <div class="insight-score score-warning">
                                     <div class="score-icon"><i class="fas fa-hdd"></i></div>
                                     <div class="score-text">
                                         <span class="score-level">警告</span>
                                         <span class="score-value">8.6/10</span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                             <div class="insight-desc">
                                 <div class="storage-stats">
@@ -2895,20 +2895,20 @@
                                 </div>
                                 <p class="storage-description">建议启用自动归档策略并清理30天以上的日志数据。</p>
                             </div>
-                            <div class="insight-meta">
+                    <div class="insight-meta">
                                 <div class="meta-info">
                                     <span><i class="fas fa-chart-line"></i> 存储增长率：12GB/天</span>
                                     <span><i class="fas fa-archive"></i> 可清理数据：2.1TB</span>
                                 </div>
                                 <div class="confidence-container">
-                                    <span>置信度:</span>
-                                    <div class="confidence-bar">
-                                        <div class="confidence-fill" style="--confidence-width: 96%;"></div>
-                                    </div>
-                                    <span class="confidence-value">96%</span>
-                                </div>
+                            <span>置信度:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="--confidence-width: 96%;"></div>
                             </div>
-                            <div class="insight-actions">
+                                    <span class="confidence-value">96%</span>
+                        </div>
+                    </div>
+                    <div class="insight-actions">
                                 <button class="insight-btn btn-apply primary">
                                     <i class="fas fa-broom"></i> 清理归档
                                 </button>
@@ -2918,8 +2918,8 @@
                                 <button class="insight-btn btn-dismiss">
                                     <i class="fas fa-eye"></i> 监控状态
                                 </button>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         <div class="ai-insight-card success" data-card="5">
                             <div class="card-background-pattern"></div>
@@ -2927,23 +2927,23 @@
                                 <i class="fas fa-heart"></i>
                                 <span>健康</span>
                             </div>
-                            <div class="insight-header">
-                                <div class="insight-title">
-                                    <div class="insight-icon" style="background: linear-gradient(135deg, #38a169, #68d391);">
-                                        <i class="fas fa-check-circle"></i>
-                                    </div>
+                    <div class="insight-header">
+                        <div class="insight-title">
+                            <div class="insight-icon" style="background: linear-gradient(135deg, #38a169, #68d391);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
                                     <div class="title-content">
                                         <h3>系统健康状态</h3>
                                         <p class="title-subtitle">整体运行评估</p>
                                     </div>
-                                </div>
-                                <div class="insight-score score-success">
+                        </div>
+                        <div class="insight-score score-success">
                                     <div class="score-icon"><i class="fas fa-heart"></i></div>
                                     <div class="score-text">
                                         <span class="score-level">优秀</span>
                                         <span class="score-value">A+</span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                             <div class="insight-desc">
                                 <div class="health-indicators">
@@ -2971,28 +2971,28 @@
                                 </div>
                                 <p class="health-description">系统整体健康度评分为A+，各项关键指标均在正常范围内。</p>
                             </div>
-                            <div class="insight-meta">
+                    <div class="insight-meta">
                                 <div class="meta-info">
                                     <span><i class="fas fa-sync-alt"></i> 最后检查：1分钟前</span>
                                     <span><i class="fas fa-chart-area"></i> 稳定运行：99.9%</span>
                                 </div>
                                 <div class="confidence-container">
-                                    <span>健康度:</span>
+                            <span>健康度:</span>
                                     <div class="confidence-bar success">
-                                        <div class="confidence-fill" style="--confidence-width: 100%;"></div>
-                                    </div>
-                                    <span class="confidence-value">100%</span>
-                                </div>
+                                <div class="confidence-fill" style="--confidence-width: 100%;"></div>
                             </div>
-                            <div class="insight-actions">
+                                    <span class="confidence-value">100%</span>
+                        </div>
+                    </div>
+                    <div class="insight-actions">
                                 <button class="insight-btn btn-details primary">
                                     <i class="fas fa-file-medical-alt"></i> 健康报告
                                 </button>
                                 <button class="insight-btn btn-apply">
                                     <i class="fas fa-rocket"></i> 优化建议
                                 </button>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         <div class="ai-insight-card info" data-card="6">
                             <div class="card-background-pattern"></div>
@@ -3000,23 +3000,23 @@
                                 <i class="fas fa-chart-pie"></i>
                                 <span>洞察</span>
                             </div>
-                            <div class="insight-header">
-                                <div class="insight-title">
-                                    <div class="insight-icon" style="background: linear-gradient(135deg, #f6ad55, #ed8936);">
-                                        <i class="fas fa-chart-pie"></i>
-                                    </div>
+                    <div class="insight-header">
+                        <div class="insight-title">
+                            <div class="insight-icon" style="background: linear-gradient(135deg, #f6ad55, #ed8936);">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
                                     <div class="title-content">
                                         <h3>日志模式分析</h3>
                                         <p class="title-subtitle">智能行为识别</p>
                                     </div>
-                                </div>
-                                <div class="insight-score score-info">
+                        </div>
+                        <div class="insight-score score-info">
                                     <div class="score-icon"><i class="fas fa-brain"></i></div>
                                     <div class="score-text">
                                         <span class="score-level">洞察</span>
                                         <span class="score-value">7.8/10</span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                             </div>
                             <div class="insight-desc">
                                 <div class="pattern-analysis">
@@ -3043,20 +3043,20 @@
                                 </div>
                                 <p class="pattern-description">机器学习算法发现访问高峰期的异常模式，建议在此时段增加监控频率。</p>
                             </div>
-                            <div class="insight-meta">
+                    <div class="insight-meta">
                                 <div class="meta-info">
                                     <span><i class="fas fa-database"></i> 分析样本：30天数据</span>
                                     <span><i class="fas fa-brain"></i> ML算法：XGBoost</span>
                                 </div>
                                 <div class="confidence-container">
-                                    <span>准确性:</span>
-                                    <div class="confidence-bar">
-                                        <div class="confidence-fill" style="--confidence-width: 89%;"></div>
-                                    </div>
-                                    <span class="confidence-value">89%</span>
-                                </div>
+                            <span>准确性:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="--confidence-width: 89%;"></div>
                             </div>
-                            <div class="insight-actions">
+                                    <span class="confidence-value">89%</span>
+                        </div>
+                    </div>
+                    <div class="insight-actions">
                                 <button class="insight-btn btn-apply primary">
                                     <i class="fas fa-cogs"></i> 调整策略
                                 </button>
@@ -3066,7 +3066,7 @@
                                 <button class="insight-btn btn-dismiss">
                                     <i class="fas fa-bookmark"></i> 记录备忘
                                 </button>
-                            </div>
+                    </div>
                         </div>
                     </div>
                 </div>
@@ -3368,33 +3368,33 @@
             // 更新图表数据 (安全版本)
             try {
                 if (typeof logTrendChart !== 'undefined' && logTrendChart) {
-                    const hours = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
-                    const newTrendData = [
-                        Array.from({length: 9}, () => Math.floor(Math.random() * 800 + 800)),   // INFO
-                        Array.from({length: 9}, () => Math.floor(Math.random() * 300 + 100)),   // WARN
+            const hours = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+            const newTrendData = [
+                Array.from({length: 9}, () => Math.floor(Math.random() * 800 + 800)),   // INFO
+                Array.from({length: 9}, () => Math.floor(Math.random() * 300 + 100)),   // WARN
                         Array.from({length: 9}, () => Math.floor(Math.random() * 100 + 20))     // ERROR
-                    ];
-                    
-                    logTrendChart.setOption({
-                        xAxis: { data: hours },
-                        series: [
-                            { data: newTrendData[0] },
-                            { data: newTrendData[1] },
+            ];
+            
+            logTrendChart.setOption({
+                xAxis: { data: hours },
+                series: [
+                    { data: newTrendData[0] },
+                    { data: newTrendData[1] },
                             { data: newTrendData[2] }
                         ]
                     });
                 }
 
                 if (typeof logLevelChart !== 'undefined' && logLevelChart) {
-                    const newPieData = [
-                        { value: Math.floor(Math.random() * 5000 + 15000), name: 'INFO', itemStyle: { color: '#3182ce' }},
-                        { value: Math.floor(Math.random() * 2000 + 3000), name: 'WARN', itemStyle: { color: '#d69e2e' }},
+            const newPieData = [
+                { value: Math.floor(Math.random() * 5000 + 15000), name: 'INFO', itemStyle: { color: '#3182ce' }},
+                { value: Math.floor(Math.random() * 2000 + 3000), name: 'WARN', itemStyle: { color: '#d69e2e' }},
                         { value: Math.floor(Math.random() * 800 + 800), name: 'ERROR', itemStyle: { color: '#e53e3e' }}
-                    ];
-                    
-                    logLevelChart.setOption({
-                        series: [{ data: newPieData }]
-                    });
+            ];
+            
+            logLevelChart.setOption({
+                series: [{ data: newPieData }]
+            });
                 }
             } catch (error) {
                 console.log('图表更新跳过（图表未初始化）');
@@ -3526,7 +3526,7 @@
                 if (diff > 0) {
                     // 向左滑动，显示下一张卡片
                     nextAICard();
-                } else {
+                    } else {
                     // 向右滑动，显示上一张卡片
                     previousAICard();
                 }
@@ -3540,7 +3540,7 @@
             autoPlayInterval = setInterval(() => {
                 if (currentAICard < totalAICards) {
                     nextAICard();
-                } else {
+                        } else {
                     currentAICard = 0; // 重置到第一张
                     nextAICard();
                 }
@@ -3558,15 +3558,15 @@
         function setupCardInteractions() {
             const statCards = document.querySelectorAll('.stat-card');
             if (statCards.length > 0) {
-                statCards.forEach(card => {
-                    card.addEventListener('click', function() {
-                        // 添加点击动画
-                        this.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 150);
-                    });
+            statCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 添加点击动画
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
                 });
+            });
             }
 
             // AI卡片按钮交互
@@ -3574,10 +3574,10 @@
             if (aiCards.length > 0) {
                 aiCards.forEach(card => {
                     const buttons = card.querySelectorAll('.insight-btn');
-                    buttons.forEach(btn => {
-                        btn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            const action = this.textContent.trim();
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const action = this.textContent.trim();
                             console.log(`执行操作：${action}`);
                             
                             // 添加按钮点击反馈
@@ -3585,10 +3585,10 @@
                             setTimeout(() => {
                                 this.style.transform = '';
                             }, 150);
-                        });
                     });
                 });
-            }
+            });
+        }
 
             // 指示器点击事件
             const indicators = document.querySelectorAll('.ai-carousel-indicators .indicator');

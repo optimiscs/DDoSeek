@@ -47,6 +47,12 @@ class DDosSeekRouter {
             return false;
         }
         
+        // 登录成功后，如果没有指定页面，默认跳转到DDoS检测防护页面
+        if (isLoggedIn && window.location.pathname.endsWith('login.html')) {
+            window.location.href = 'ddos-detection.html';
+            return true;
+        }
+        
         return true;
     }
 
@@ -102,11 +108,11 @@ class DDosSeekRouter {
             });
         }
 
-        // Logo点击返回首页
+        // Logo点击返回首页（DDoS检测防护页面）
         const logo = document.querySelector('.logo');
         if (logo) {
             logo.addEventListener('click', () => {
-                window.location.href = 'dashboard.html';
+                window.location.href = 'ddos-detection.html';
             });
             logo.style.cursor = 'pointer';
         }
@@ -114,19 +120,29 @@ class DDosSeekRouter {
 
     bindKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + 数字键快速导航
+            // Ctrl/Cmd + 数字键快速导航 (按新的导航顺序)
             if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '8') {
                 e.preventDefault();
-                const navLinks = document.querySelectorAll('.sidebar-menu a');
-                const index = parseInt(e.key) - 1;
-                if (navLinks[index]) {
-                    navLinks[index].click();
+                const navigationMap = {
+                    '1': 'ddos-detection.html',      // DDoS检测防护
+                    '2': 'deepseek-assistant.html',  // DeepSeek AI助手  
+                    '3': 'dashboard.html',           // 系统仪表盘
+                    '4': 'network-monitor.html',     // 网络监测中心
+                    '5': 'firewall-management.html', // 防火墙管理
+                    '6': 'log-center.html',          // 智能日志中心
+                    '7': 'rule-config.html',         // 规则配置中心
+                    '8': 'system-test.html'          // 系统测试平台
+                };
+                
+                const targetPage = navigationMap[e.key];
+                if (targetPage) {
+                    window.location.href = targetPage;
                 }
             }
             
-            // ESC键返回仪表盘
+            // ESC键返回DDoS检测防护页面（新的默认首页）
             if (e.key === 'Escape') {
-                window.location.href = 'dashboard.html';
+                window.location.href = 'ddos-detection.html';
             }
             
             // Ctrl/Cmd + Shift + L 快速退出
@@ -179,7 +195,8 @@ class DDosSeekRouter {
         
         hints.innerHTML = `
             <span>快捷键：</span>
-            <span style="margin: 0 8px;">Ctrl+1-8 快速导航</span>
+            <span style="margin: 0 8px;">Ctrl+1 DDoS防护</span>
+            <span style="margin: 0 8px;">Ctrl+2 AI助手</span>
             <span style="margin: 0 8px;">ESC 返回首页</span>
             <span style="margin: 0 8px;">Ctrl+Shift+L 退出</span>
         `;
