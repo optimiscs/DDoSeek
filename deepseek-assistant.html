@@ -39,14 +39,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.6), transparent);
-            background-size: 200% 100%;
-            animation: glassShimmer 3s infinite;
-        }
-
-        @keyframes glassShimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            background: rgba(24, 144, 255, 0.6);
         }
 
         .top-navbar {
@@ -181,7 +174,6 @@
             letter-spacing: 0.5px;
             background: rgba(56, 161, 105, 0.2);
             color: #38a169;
-            animation: pulse 2s infinite;
             position: relative;
             overflow: hidden;
         }
@@ -324,7 +316,6 @@
             height: 8px;
             border-radius: 50%;
             background: #38a169;
-            animation: pulse 2s infinite;
             box-shadow: 0 0 10px rgba(56, 161, 105, 0.5);
         }
 
@@ -611,14 +602,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.6), transparent);
-            background-size: 200% 100%;
-            animation: panelShimmer 4s infinite;
-        }
-
-        @keyframes panelShimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            background: rgba(24, 144, 255, 0.6);
         }
 
         .panel:hover {
@@ -763,9 +747,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(24, 144, 255, 0.6), transparent);
-            background-size: 200% 100%;
-            animation: statShimmer 3s infinite;
+            background: rgba(24, 144, 255, 0.6);
         }
 
         .stat-card:hover {
@@ -921,11 +903,7 @@
             background: rgba(0, 0, 0, 0.3);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+
 
         @keyframes typingBounce {
             0%, 80%, 100% { transform: translateY(0); }
@@ -1045,18 +1023,14 @@
         .severity-fill {
             height: 100%;
             border-radius: 2px;
-            animation: severityPulse 2s infinite;
+
         }
 
         .severity-fill.high { background: linear-gradient(90deg, #e53e3e, #f56565); width: 90%; }
         .severity-fill.medium { background: linear-gradient(90deg, #d69e2e, #f6ad55); width: 60%; }
         .severity-fill.low { background: linear-gradient(90deg, #38a169, #68d391); width: 30%; }
 
-        @keyframes severityPulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
+
 
         /* AI洞察项目样式 */
         .insight-item {
@@ -1129,13 +1103,6 @@
             height: 100%;
             background: linear-gradient(90deg, #38a169, #68d391);
             border-radius: 2px;
-            animation: confidencePulse 1.5s infinite;
-        }
-
-        @keyframes confidencePulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
         }
 
         .insight-desc {
