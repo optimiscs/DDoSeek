@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDosSeek - 系统仪表盘</title>
+    <title>DDoSeek - 系统仪表盘</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1319,7 +1319,7 @@
     <nav class="top-navbar">
         <div class="logo">
             <i class="fas fa-shield-alt"></i>
-            DDosSeek
+            DDoSeek
         </div>
         <div class="user-section">
             <i class="fas fa-bell" style="cursor: pointer; color: #faad14;"></i>
@@ -2227,7 +2227,7 @@
         });
 
         // 导航管理
-        class DDosSeekRouter {
+        class DDoSeekRouter {
             constructor() {
                 this.currentPage = 'dashboard';
                 this.init();
@@ -2238,7 +2238,7 @@
                 this.checkAuthentication();
                 
                 // 设置页面标题
-                document.title = 'DDosSeek - 系统仪表盘';
+                document.title = 'DDoSeek - 系统仪表盘';
                 
                 // 添加导航事件监听
                 this.bindNavigationEvents();
@@ -2248,7 +2248,7 @@
             }
 
             checkAuthentication() {
-                const isLoggedIn = localStorage.getItem('ddosseek_logged_in');
+                const isLoggedIn = localStorage.getItem('DDoSeek_logged_in');
                 if (!isLoggedIn) {
                     // 如果未登录，跳转到登录页面
                     window.location.href = 'login.html';
@@ -2269,7 +2269,7 @@
                         // 保存当前页面状态
                         const href = e.target.closest('a').getAttribute('href');
                         const pageName = href.replace('.html', '');
-                        localStorage.setItem('ddosseek_current_page', pageName);
+                        localStorage.setItem('DDoSeek_current_page', pageName);
                     });
                 });
 
@@ -2399,10 +2399,10 @@
             logout() {
                 if (confirm('确定要退出登录吗？')) {
                     // 清除登录状态
-                    localStorage.removeItem('ddosseek_logged_in');
-                    localStorage.removeItem('ddosseek_username');
-                    localStorage.removeItem('ddosseek_remember');
-                    localStorage.removeItem('ddosseek_current_page');
+                    localStorage.removeItem('DDoSeek_logged_in');
+                    localStorage.removeItem('DDoSeek_username');
+                    localStorage.removeItem('DDoSeek_remember');
+                    localStorage.removeItem('DDoSeek_current_page');
                     
                     // 跳转到登录页面
                     window.location.href = 'login.html';
@@ -2435,7 +2435,7 @@
         }
 
         // 初始化路由管理器
-        const router = new DDosSeekRouter();
+        const router = new DDoSeekRouter();
 
         // 监听页面可见性变化
         document.addEventListener('visibilitychange', () => {

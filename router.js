@@ -1,8 +1,8 @@
 /**
- * DDosSeek 系统路由管理器
+ * DDoSeek 系统路由管理器
  * 负责页面导航、身份验证、用户交互等功能
  */
-class DDosSeekRouter {
+class DDoSeekRouter {
     constructor(currentPage = 'dashboard') {
         this.currentPage = currentPage;
         this.pauseUpdates = false;
@@ -30,8 +30,8 @@ class DDosSeekRouter {
     }
 
     checkAuthentication() {
-        const isLoggedIn = localStorage.getItem('ddosseek_logged_in');
-        const loginTime = localStorage.getItem('ddosseek_login_time');
+        const isLoggedIn = localStorage.getItem('DDoSeek_logged_in');
+        const loginTime = localStorage.getItem('DDoSeek_login_time');
         
         if (!isLoggedIn) {
             // 如果未登录，跳转到登录页面
@@ -69,8 +69,8 @@ class DDosSeekRouter {
             'login': '登录认证'
         };
         
-        const title = pageTitles[this.currentPage] || 'DDosSeek';
-        document.title = `DDosSeek - ${title}`;
+        const title = pageTitles[this.currentPage] || 'DDoSeek';
+        document.title = `DDoSeek - ${title}`;
     }
 
     bindNavigationEvents() {
@@ -85,7 +85,7 @@ class DDosSeekRouter {
                 // 保存当前页面状态
                 const href = e.target.closest('a').getAttribute('href');
                 const pageName = href.replace('.html', '');
-                localStorage.setItem('ddosseek_current_page', pageName);
+                localStorage.setItem('DDoSeek_current_page', pageName);
                 
                 // 添加页面切换动画
                 this.addPageTransition();
@@ -154,14 +154,14 @@ class DDosSeekRouter {
             // F5 或 Ctrl/Cmd + R 刷新页面
             if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
                 // 保存刷新前的状态
-                localStorage.setItem('ddosseek_last_refresh', new Date().getTime());
+                localStorage.setItem('DDoSeek_last_refresh', new Date().getTime());
             }
         });
     }
 
     initUserInterface() {
         // 显示用户信息
-        const username = localStorage.getItem('ddosseek_username') || '管理员';
+        const username = localStorage.getItem('DDoSeek_username') || '管理员';
         const userNameSpan = document.querySelector('.user-section span');
         if (userNameSpan) {
             userNameSpan.textContent = username;
@@ -301,8 +301,8 @@ class DDosSeekRouter {
             animation: slideInRight 0.3s ease;
         `;
         
-        const username = localStorage.getItem('ddosseek_username') || '管理员';
-        const loginTime = localStorage.getItem('ddosseek_login_time');
+        const username = localStorage.getItem('DDoSeek_username') || '管理员';
+        const loginTime = localStorage.getItem('DDoSeek_login_time');
         const loginDate = loginTime ? new Date(parseInt(loginTime)).toLocaleString() : '未知';
         
         menu.innerHTML = `
@@ -449,17 +449,17 @@ class DDosSeekRouter {
     }
 
     showHelp() {
-        window.open('https://ddosseek.com/help', '_blank');
+        window.open('https://DDoSeek.com/help', '_blank');
     }
 
     logout() {
         if (confirm('确定要退出登录吗？')) {
             // 清除登录状态
-            localStorage.removeItem('ddosseek_logged_in');
-            localStorage.removeItem('ddosseek_username');
-            localStorage.removeItem('ddosseek_remember');
-            localStorage.removeItem('ddosseek_current_page');
-            localStorage.removeItem('ddosseek_login_time');
+            localStorage.removeItem('DDoSeek_logged_in');
+            localStorage.removeItem('DDoSeek_username');
+            localStorage.removeItem('DDoSeek_remember');
+            localStorage.removeItem('DDoSeek_current_page');
+            localStorage.removeItem('DDoSeek_login_time');
             
             // 添加退出动画
             const overlay = document.createElement('div');
@@ -580,5 +580,5 @@ if (!document.querySelector('#router-animations')) {
 
 // 导出路由管理器（如果支持ES6模块）
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = DDosSeekRouter;
+    module.exports = DDoSeekRouter;
 } 

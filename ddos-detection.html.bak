@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDosSeek - DDoS检测防护</title>
+    <title>DDoSeek - DDoS检测防护</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1579,7 +1579,7 @@
     <nav class="top-navbar">
         <div class="logo">
             <i class="fas fa-shield-alt"></i>
-            DDosSeek
+            DDoSeek
         </div>
         <div class="user-section">
             <i class="fas fa-bell" style="cursor: pointer; color: #faad14;"></i>
@@ -2750,7 +2750,7 @@
         updateThreatData();
 
         // 初始化路由管理器
-        const router = new DDosSeekRouter('ddos-detection');
+        const router = new DDoSeekRouter('ddos-detection');
     </script>
     <script src="router.js"></script>
 </body>

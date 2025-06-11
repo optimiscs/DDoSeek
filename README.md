@@ -1,8 +1,8 @@
-# DDosSeek 智能DDoS检测防护系统
+# DDoSeek 智能DDoS检测防护系统
 
 ## 项目概述
 
-DDosSeek是一个基于SDN的智能DDoS检测防护系统，结合DeepSeek技术，面向云平台用户和网络管理员。系统提供完整的DDoS检测、防护、分析和管理功能。
+DDoSeek是一个基于SDN的智能DDoS检测防护系统，结合DeepSeek技术，面向云平台用户和网络管理员。系统提供完整的DDoS检测、防护、分析和管理功能。
 
 ## 系统架构
 
@@ -175,7 +175,7 @@ DDosSeek是一个基于SDN的智能DDoS检测防护系统，结合DeepSeek技术
 
 1. **文件结构**
    ```
-   DDosSeek/
+   DDoSeek/
    ├── login.html              # 登录页面
    ├── dashboard.html           # 系统仪表盘
    ├── network-monitor.html     # 网络监测中心
@@ -228,10 +228,10 @@ DDosSeek是一个基于SDN的智能DDoS检测防护系统，结合DeepSeek技术
 
 ## 联系信息
 
-- **项目名称**: DDosSeek 智能DDoS检测防护系统
+- **项目名称**: DDoSeek 智能DDoS检测防护系统
 - **技术支持**: 专业的DDoS检测防护解决方案
 - **文档更新**: 随系统版本同步更新
 
 ---
 
-*本文档详细介绍了DDosSeek系统的完整路由功能和使用说明。如有疑问，请参考各页面的内置帮助系统或联系技术支持。* 
+*本文档详细介绍了DDoSeek系统的完整路由功能和使用说明。如有疑问，请参考各页面的内置帮助系统或联系技术支持。* 

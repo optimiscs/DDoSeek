@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDosSeek - 智能DDoS检测防护系统</title>
+    <title>DDoSeek - 智能DDoS检测防护系统</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -449,7 +449,7 @@
                     <div class="logo-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <div class="logo-text">DDosSeek</div>
+                    <div class="logo-text">DDoSeek</div>
                 </div>
                 <div class="brand-description">
                     基于SDN架构的智能DDoS检测防护系统，结合DeepSeek AI技术，为企业网络提供全方位安全保障。
@@ -484,7 +484,7 @@
         <section class="auth-section">
             <div class="auth-container">
                 <div class="auth-header">
-                    <h2>欢迎使用DDosSeek</h2>
+                    <h2>欢迎使用DDoSeek</h2>
                     <p>智能DDoS检测防护系统，守护您的网络安全</p>
                 </div>
 
@@ -621,13 +621,13 @@
                     setTimeout(() => {
                         // 模拟登录验证 - 无条件成功
                         // 保存登录状态
-                        localStorage.setItem('ddosseek_logged_in', 'true');
-                        localStorage.setItem('ddosseek_login_time', new Date().getTime());
+                        localStorage.setItem('DDoSeek_logged_in', 'true');
+                        localStorage.setItem('DDoSeek_login_time', new Date().getTime());
                         
                         const remember = document.getElementById('remember-me').checked;
                         if (remember) {
-                            localStorage.setItem('ddosseek_remember', 'true');
-                            localStorage.setItem('ddosseek_username', username.value);
+                            localStorage.setItem('DDoSeek_remember', 'true');
+                            localStorage.setItem('DDoSeek_username', username.value);
                         }
                         
                         showMessage('登录成功，正在跳转到DDoS检测防护系统...', 'success');
@@ -828,8 +828,8 @@
             document.head.appendChild(style);
 
             // 检查记住的用户信息
-            const rememberedUsername = localStorage.getItem('ddosseek_username');
-            const rememberSetting = localStorage.getItem('ddosseek_remember');
+            const rememberedUsername = localStorage.getItem('DDoSeek_username');
+            const rememberSetting = localStorage.getItem('DDoSeek_remember');
             
             if (rememberSetting === 'true' && rememberedUsername) {
                 document.getElementById('login-username').value = rememberedUsername;
@@ -838,7 +838,7 @@
 
             // 页面加载完成后显示欢迎消息
             setTimeout(() => {
-                showMessage('欢迎使用DDosSeek智能防护系统', 'info');
+                showMessage('欢迎使用DDoSeek智能防护系统', 'info');
             }, 1000);
         });
     </script>
