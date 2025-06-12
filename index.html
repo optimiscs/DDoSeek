@@ -936,6 +936,142 @@
                 gap: 30px;
             }
         }
+
+        /* 成功消息样式 */
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            text-align: center;
+            z-index: 10000;
+            min-width: 400px;
+            animation: successFadeIn 0.5s ease;
+        }
+
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            animation: overlayFadeIn 0.3s ease;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--success-color), #00e676);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successBounce 0.6s ease 0.2s both;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 12px;
+        }
+
+        .success-description {
+            color: var(--text-color);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .success-close-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .success-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 41, 128, 0.3);
+        }
+
+        .form-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .form-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: loading 1s linear infinite;
+        }
+
+        @keyframes successFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes successBounce {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes loading {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .success-message {
+                min-width: 320px;
+                margin: 0 20px;
+                padding: 30px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -959,8 +1095,8 @@
                     <li><a href="#about">关于我们</a></li>
                 </ul>
                 <div class="nav-buttons">
-                    <a href="frontend/login.html" class="btn btn-outline">登录</a>
-                    <a href="frontend/dashboard.html" class="btn btn-primary">进入系统</a>
+                    <a href="login.html" class="btn btn-outline">登录</a>
+                    <a href="#contact" class="btn btn-primary">联系我们</a>
                 </div>
                 <div class="menu-toggle">☰</div>
             </nav>
@@ -975,7 +1111,7 @@
                 <p class="hero-subtitle">采用微调DeepSeek驱动的SDN实时流量管控<br>为网络基础设施提供安全防护解决方案</p>
                 <div class="hero-buttons">
                     <a href="#features" class="btn btn-primary">了解更多</a>
-                    <a href="frontend/login.html" class="btn btn-outline">开始使用</a>
+                    <a href="login.html" class="btn btn-outline">开始使用</a>
                 </div>
             </div>
         </div>
@@ -1525,7 +1661,7 @@
                     <h3 class="contact-title">联系我们</h3>
                     <p class="contact-description">如果您对DDoSeek有任何疑问或者希望接入系统，请填写以下表单，我们会尽快与您联系。</p>
                     
-                    <form action="#" method="post">
+                    <form id="contactForm" action="#" method="post">
                         <div class="form-group">
                             <label for="name">姓名</label>
                             <input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
@@ -1551,7 +1687,9 @@
                             <textarea id="message" name="message" rows="4" placeholder="请输入您的留言内容"></textarea>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">提交</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="btn-text">提交</span>
+                        </button>
                     </form>
                 </div>
             </div>
@@ -1657,6 +1795,155 @@
             navLinks.classList.toggle('active');
             navButtons.classList.toggle('active');
         });
+
+        // 联系表单处理
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (contactForm && submitBtn) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); // 阻止默认表单提交
+
+                    // 获取表单数据
+                    const formData = new FormData(contactForm);
+                    const name = formData.get('name');
+                    const organization = formData.get('organization');
+                    const email = formData.get('email');
+                    const phone = formData.get('phone');
+                    const message = formData.get('message');
+
+                    // 简单验证
+                    if (!name || !organization || !email || !phone) {
+                        showToast('请填写所有必填字段', 'error');
+                        return;
+                    }
+
+                    // 显示加载状态
+                    showLoading();
+
+                    // 模拟提交过程（实际项目中这里应该是真实的API调用）
+                    setTimeout(() => {
+                        hideLoading();
+                        showSuccessMessage(name, organization);
+                        contactForm.reset(); // 重置表单
+                    }, 2000);
+                });
+            }
+
+            function showLoading() {
+                const form = document.querySelector('.contact-form');
+                const btnText = submitBtn.querySelector('.btn-text');
+                
+                form.classList.add('form-loading');
+                submitBtn.disabled = true;
+                btnText.textContent = '提交中...';
+            }
+
+            function hideLoading() {
+                const form = document.querySelector('.contact-form');
+                const btnText = submitBtn.querySelector('.btn-text');
+                
+                form.classList.remove('form-loading');
+                submitBtn.disabled = false;
+                btnText.textContent = '提交';
+            }
+
+            function showSuccessMessage(name, organization) {
+                // 创建遮罩层
+                const overlay = document.createElement('div');
+                overlay.className = 'success-overlay';
+
+                // 创建成功消息框
+                const successMessage = document.createElement('div');
+                successMessage.className = 'success-message';
+                successMessage.innerHTML = `
+                    <div class="success-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="success-title">提交成功！</h3>
+                    <p class="success-description">
+                        感谢 <strong>${name}</strong> 来自 <strong>${organization}</strong> 的联系！<br>
+                        我们已收到您的信息，将在24小时内与您取得联系。
+                    </p>
+                    <button class="success-close-btn" onclick="closeSuccessMessage()">确定</button>
+                `;
+
+                // 添加到页面
+                document.body.appendChild(overlay);
+                document.body.appendChild(successMessage);
+
+                // 添加关闭功能
+                overlay.addEventListener('click', closeSuccessMessage);
+
+                // 3秒后自动关闭
+                setTimeout(closeSuccessMessage, 5000);
+            }
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 10001;
+                    font-size: 14px;
+                    font-weight: 500;
+                    animation: slideInRight 0.3s ease;
+                `;
+                toast.textContent = message;
+
+                // 添加CSS动画
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                document.body.appendChild(toast);
+
+                // 3秒后移除
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            document.body.removeChild(toast);
+                        }
+                        document.head.removeChild(style);
+                    }, 300);
+                }, 3000);
+            }
+        });
+
+        // 全局关闭成功消息函数
+        function closeSuccessMessage() {
+            const overlay = document.querySelector('.success-overlay');
+            const message = document.querySelector('.success-message');
+            
+            if (overlay && message) {
+                overlay.style.animation = 'overlayFadeIn 0.3s ease reverse';
+                message.style.animation = 'successFadeIn 0.3s ease reverse';
+                
+                setTimeout(() => {
+                    if (overlay.parentNode) document.body.removeChild(overlay);
+                    if (message.parentNode) document.body.removeChild(message);
+                }, 300);
+            }
+        }
     </script>
 </body>
 </html> 
