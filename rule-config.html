@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDoSeek - 规则配置中心</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f7fafc 100%);
+            color: #2d3748;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(24, 144, 255, 0.8);
+        }
+
+        .glass-effect:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(24, 144, 255, 0.3);
+        }
+
+        .top-navbar {
+            height: 64px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1890ff;
+        }
+
+        .logo i {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #4a5568;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890ff, #52c41a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 左侧边栏 - 统一样式 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            bottom: 0;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 24px 0;
+            z-index: 999;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 4px 16px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(24, 144, 255, 0.1);
+            color: #1890ff;
+            transform: translateX(2px);
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rule-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(56, 161, 105, 0.2);
+            color: #38a169;
+
+        }
+
+        .action-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary { background: #3182ce; color: white; }
+        .btn-success { background: #38a169; color: white; }
+        .btn-warning { background: #d69e2e; color: white; }
+        .btn-danger { background: #e53e3e; color: white; }
+
+        .btn-primary:hover { background: #2c5282; }
+        .btn-success:hover { background: #2f855a; }
+        .btn-warning:hover { background: #b7791f; }
+        .btn-danger:hover { background: #c53030; }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            padding: 24px;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(24, 144, 255, 0.8);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: iconShine 2s infinite;
+        }
+
+        @keyframes iconShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .stat-value-container {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .stat-change.positive {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #e53e3e;
+        }
+
+        .stat-change.neutral {
+            background: rgba(113, 128, 150, 0.1);
+            color: #718096;
+        }
+
+        .stat-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-subtitle {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .stat-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.active { background: #22c55e; }
+        .status-dot.warning { background: #f59e0b; }
+        .status-dot.danger { background: #ef4444; }
+
+        .stat-mini-chart {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .stat-mini-chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3182ce, #63b3ed);
+            animation: chartFill 2s ease-out;
+        }
+
+        @keyframes chartFill {
+            from { width: 0; }
+            to { width: var(--fill-width); }
+        }
+
+        .rule-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .rule-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .rule-categories {
+            padding: 16px;
+            flex: 1;
+        }
+
+        .category-header {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #2d3748;
+        }
+
+        .category-item {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .category-item:hover {
+            background: rgba(49, 130, 206, 0.1);
+        }
+
+        .category-item.active {
+            background: rgba(49, 130, 206, 0.2);
+            color: #3182ce;
+        }
+
+        .category-count {
+            padding: 2px 6px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            font-size: 10px;
+            color: #718096;
+        }
+
+        .active .category-count {
+            background: rgba(49, 130, 206, 0.3);
+            color: #3182ce;
+        }
+
+        .rule-editor {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.9));
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .editor-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #3182ce, #63b3ed);
+            border-radius: 2px;
+        }
+
+        .editor-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .editor-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .editor-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .editor-btn:hover::before {
+            left: 100%;
+        }
+
+        .editor-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .rule-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(251,253,255,0.95));
+        }
+
+        .rule-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(135deg, #3182ce, #63b3ed);
+            border-radius: 2px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 12px 16px;
+            border: 2px solid rgba(49, 130, 206, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(49, 130, 206, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group-advanced {
+            background: rgba(49, 130, 206, 0.05);
+            border: 1px solid rgba(49, 130, 206, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .form-group-advanced .form-label {
+            color: #3182ce;
+            font-weight: 800;
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        @media (max-width: 1200px) {
+            .rule-layout {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* 响应式设计 - 统一标准 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                transition: margin-left 0.3s ease;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+
+    </style>
+</head>
+<body>
+    <nav class="top-navbar">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            DDoSeek
+        </div>
+        <div class="user-section">
+            <i class="fas fa-bell" style="cursor: pointer; color: #faad14;"></i>
+            <div class="user-avatar">A</div>
+            <span>管理员</span>
+        </div>
+    </nav>
+
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="ddos-detection.html"><i class="fas fa-shield-virus"></i>DDoS检测防护</a></li>
+            <li><a href="deepseek-assistant.html"><i class="fas fa-robot"></i>DeepSeek AI助手</a></li>
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i>系统仪表盘</a></li>
+            <li><a href="network-monitor.html"><i class="fas fa-network-wired"></i>网络监测中心</a></li>
+            <li><a href="firewall-management.html"><i class="fas fa-fire-extinguisher"></i>防火墙管理</a></li>
+            <li><a href="log-center.html"><i class="fas fa-file-alt"></i>智能日志中心</a></li>
+            <li><a href="rule-config.html" class="active"><i class="fas fa-cogs"></i>规则配置中心</a></li>
+            <li><a href="system-test.html"><i class="fas fa-vial"></i>系统测试平台</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" style="margin-bottom: 16px; font-size: 12px; color: #718096;">
+            <span><i class="fas fa-home"></i> 首页</span>
+            <span style="margin: 0 8px;">/</span>
+            <span><a href="dashboard.html" style="color: #718096; text-decoration: none;">系统仪表盘</a></span>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #3182ce; font-weight: 500;">规则配置中心</span>
+        </nav>
+
+        <div class="page-header">
+            <div class="page-title">
+                <i class="fas fa-cogs"></i>
+                规则配置中心
+                <div class="rule-status">规则同步</div>
+            </div>
+            <div class="action-controls">
+                <button class="action-btn btn-success">
+                    <i class="fas fa-plus"></i> 新增规则
+                </button>
+                <button class="action-btn btn-primary">
+                    <i class="fas fa-upload"></i> 导入规则
+                </button>
+                <button class="action-btn btn-warning">
+                    <i class="fas fa-download"></i> 导出规则
+                </button>
+                <button class="action-btn btn-danger">
+                    <i class="fas fa-sync"></i> 同步规则
+                </button>
+            </div>
+        </div>
+
+        <section class="stats-section">
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">活跃规则总数</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3182ce, #63b3ed);">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #3182ce;">156</div>
+                    <div class="stat-change positive">+8</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">过去24小时新增</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>运行中</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 78%; background: linear-gradient(90deg, #3182ce, #63b3ed);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">DDoS防护规则</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #e53e3e, #f56565);">
+                        <i class="fas fa-shield-virus"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #e53e3e;">48</div>
+                    <div class="stat-change positive">+3</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">覆盖12种攻击类型</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>高效</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 92%; background: linear-gradient(90deg, #e53e3e, #f56565);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">防火墙规则</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #d69e2e, #f6ad55);">
+                        <i class="fas fa-fire-extinguisher"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #d69e2e;">92</div>
+                    <div class="stat-change negative">-2</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">访问控制优化</div>
+                    <div class="stat-status">
+                        <span class="status-dot warning"></span>
+                        <span>调整中</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 65%; background: linear-gradient(90deg, #d69e2e, #f6ad55);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">监控规则</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #38a169, #68d391);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #38a169;">34</div>
+                    <div class="stat-change positive">+5</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">实时性能监控</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>活跃</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 85%; background: linear-gradient(90deg, #38a169, #68d391);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">自定义规则</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #805ad5, #b794f6);">
+                        <i class="fas fa-code"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #805ad5;">23</div>
+                    <div class="stat-change positive">+1</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">用户定义脚本</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>稳定</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 45%; background: linear-gradient(90deg, #805ad5, #b794f6);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-effect">
+                <div class="stat-header">
+                    <span class="stat-label">规则执行效率</span>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f759ab, #ff85c0);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                </div>
+                <div class="stat-value-container">
+                    <div class="stat-value" style="color: #f759ab;">97.2<span style="font-size: 16px;">%</span></div>
+                    <div class="stat-change positive">+1.2%</div>
+                </div>
+                <div class="stat-bottom">
+                    <div class="stat-subtitle">平均响应时间 3ms</div>
+                    <div class="stat-status">
+                        <span class="status-dot active"></span>
+                        <span>优秀</span>
+                    </div>
+                </div>
+                <div class="stat-mini-chart">
+                    <div class="stat-mini-chart-fill" style="--fill-width: 97%; background: linear-gradient(90deg, #f759ab, #ff85c0);"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="rule-layout">
+            <div class="rule-sidebar">
+                <div class="rule-categories glass-effect">
+                    <div class="category-header">
+                        <i class="fas fa-layer-group"></i>
+                        规则分类管理
+                    </div>
+                    
+                    <div class="category-item active" onclick="switchCategory('ddos')">
+                        <span><i class="fas fa-shield-virus" style="color: #e53e3e;"></i> DDoS防护规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">48</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-item" onclick="switchCategory('firewall')">
+                        <span><i class="fas fa-fire-extinguisher" style="color: #d69e2e;"></i> 防火墙规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">92</span>
+                            <span class="status-dot warning"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-item" onclick="switchCategory('monitor')">
+                        <span><i class="fas fa-chart-line" style="color: #38a169;"></i> 监控规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">34</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-item" onclick="switchCategory('access')">
+                        <span><i class="fas fa-key" style="color: #805ad5;"></i> 访问控制规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">67</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-item" onclick="switchCategory('rate-limit')">
+                        <span><i class="fas fa-stopwatch" style="color: #3182ce;"></i> 限速规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">29</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-item" onclick="switchCategory('custom')">
+                        <span><i class="fas fa-code" style="color: #f759ab;"></i> 自定义规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">23</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-item" onclick="switchCategory('template')">
+                        <span><i class="fas fa-file-code" style="color: #13c2c2;"></i> 规则模板</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">15</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+
+                    <div class="category-item" onclick="switchCategory('schedule')">
+                        <span><i class="fas fa-calendar-alt" style="color: #52c41a;"></i> 定时规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">12</span>
+                            <span class="status-dot active"></span>
+                        </div>
+                    </div>
+
+                    <div class="category-item" onclick="switchCategory('disabled')">
+                        <span><i class="fas fa-pause-circle" style="color: #718096;"></i> 禁用规则</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="category-count">8</span>
+                            <span class="status-dot danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rule-editor glass-effect">
+                <div class="editor-header">
+                    <div class="editor-title">DDoS防护规则编辑器</div>
+                    <div class="editor-controls">
+                        <button class="editor-btn btn-primary">保存</button>
+                        <button class="editor-btn btn-success">测试</button>
+                        <button class="editor-btn btn-warning">重置</button>
+                    </div>
+                </div>
+                
+                <div class="rule-content">
+                    <form class="rule-form" id="ruleForm">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-tag"></i>
+                                规则名称
+                            </label>
+                            <input type="text" class="form-input" placeholder="输入规则名称..." value="HTTP Flood 防护规则">
+                            <div class="form-help">规则名称应具有描述性，便于识别和管理</div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-cogs"></i>
+                                    规则类型
+                                </label>
+                                <select class="form-select">
+                                    <option value="ddos">DDoS防护</option>
+                                    <option value="firewall">防火墙</option>
+                                    <option value="monitor">监控</option>
+                                    <option value="access">访问控制</option>
+                                    <option value="rate-limit">限速</option>
+                                    <option value="custom">自定义</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    优先级
+                                </label>
+                                <select class="form-select">
+                                    <option value="critical">紧急</option>
+                                    <option value="high">高</option>
+                                    <option value="medium" selected>中</option>
+                                    <option value="low">低</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-bolt"></i>
+                                    触发条件
+                                </label>
+                                <input type="text" class="form-input" placeholder="请求频率 > 100/秒" value="request_rate > 100">
+                                <div class="form-help">支持复杂条件表达式，如：(req_rate > 100) && (error_rate > 50%)</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-play"></i>
+                                    执行动作
+                                </label>
+                                <select class="form-select">
+                                    <option value="block">阻断</option>
+                                    <option value="limit" selected>限制</option>
+                                    <option value="redirect">重定向</option>
+                                    <option value="captcha">验证码</option>
+                                    <option value="log">记录</option>
+                                    <option value="alert">告警</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-clock"></i>
+                                    生效时间
+                                </label>
+                                <select class="form-select">
+                                    <option value="always">始终生效</option>
+                                    <option value="schedule">定时生效</option>
+                                    <option value="conditional">条件生效</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    持续时间 (秒)
+                                </label>
+                                <input type="number" class="form-input" placeholder="300" value="300">
+                                <div class="form-help">规则触发后的生效持续时间</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                规则描述
+                            </label>
+                            <textarea class="form-textarea" placeholder="描述规则的功能和用途...">检测并防护HTTP Flood攻击，当单个IP请求频率超过100次/秒时，自动限制其访问速度到50次/秒，持续5分钟。该规则特别针对突发性的HTTP洪水攻击，能够有效保护Web服务的可用性。</textarea>
+                            <div class="form-help">详细描述有助于团队成员理解规则用途</div>
+                        </div>
+                        
+                        <div class="form-group-advanced">
+                            <label class="form-label">
+                                <i class="fas fa-code"></i>
+                                高级规则代码
+                            </label>
+                            <textarea class="form-textarea" style="min-height: 250px;" placeholder="输入规则代码...">// HTTP Flood 防护规则 - 高级版本
+// 版本: 2.1.0
+// 作者: 安全团队
+// 最后更新: 2025-01-15
+
+// 定义检测参数
+const RATE_THRESHOLD = 100;  // 请求阈值（次/秒）
+const LIMIT_RATE = 50;       // 限制速率（次/秒）
+const DURATION = 300;        // 限制持续时间（秒）
+const WINDOW_SIZE = 60;      // 检测窗口（秒）
+
+// 主要检测逻辑
+if (source_ip.request_rate > RATE_THRESHOLD per second) {
+    // 记录攻击事件
+    log("HTTP Flood detected", {
+        source_ip: source_ip,
+        request_rate: source_ip.request_rate,
+        user_agent: request.user_agent,
+        timestamp: now()
+    });
+    
+    // 执行限速措施
+    action = "rate_limit";
+    limit_rate = LIMIT_RATE;
+    duration = DURATION;
+    
+    // 发送告警通知
+    if (source_ip.request_rate > RATE_THRESHOLD * 2) {
+        send_alert("High volume HTTP Flood detected from " + source_ip);
+    }
+    
+    // 更新威胁情报
+    threat_intel.add_ip(source_ip, "http_flood", severity="medium");
+}</textarea>
+                            <div class="form-help">使用JavaScript语法编写规则逻辑，支持内置函数和变量</div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 切换规则分类
+        function switchCategory(category) {
+            // 更新分类选中状态
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.category-item').classList.add('active');
+            
+            // 更新编辑器标题和内容
+            const categoryTitles = {
+                'ddos': 'DDoS防护规则编辑器',
+                'firewall': '防火墙规则编辑器',
+                'monitor': '监控规则编辑器',
+                'access': '访问控制规则编辑器',
+                'rate-limit': '限速规则编辑器',
+                'custom': '自定义规则编辑器',
+                'template': '规则模板编辑器',
+                'schedule': '定时规则编辑器',
+                'disabled': '禁用规则管理器'
+            };
+            
+            const categoryIcons = {
+                'ddos': 'fas fa-shield-virus',
+                'firewall': 'fas fa-fire-extinguisher',
+                'monitor': 'fas fa-chart-line',
+                'access': 'fas fa-key',
+                'rate-limit': 'fas fa-stopwatch',
+                'custom': 'fas fa-code',
+                'template': 'fas fa-file-code',
+                'schedule': 'fas fa-calendar-alt',
+                'disabled': 'fas fa-pause-circle'
+            };
+            
+            const editorTitle = document.querySelector('.editor-title');
+            editorTitle.innerHTML = `<i class="${categoryIcons[category]}"></i> ${categoryTitles[category]}`;
+            loadRuleTemplate(category);
+        }
+        
+        // 加载规则模板
+        function loadRuleTemplate(category) {
+            const templates = {
+                'ddos': {
+                    name: 'HTTP Flood 防护规则 v2.1',
+                    type: 'ddos',
+                    priority: 'high',
+                    condition: 'request_rate > 100',
+                    action: 'limit',
+                    duration: '300',
+                    description: '检测并防护HTTP Flood攻击，当单个IP请求频率超过100次/秒时，自动限制其访问速度到50次/秒，持续5分钟。该规则特别针对突发性的HTTP洪水攻击，能够有效保护Web服务的可用性。',
+                    code: `// HTTP Flood 防护规则 - 高级版本
+// 版本: 2.1.0
+// 作者: 安全团队
+// 最后更新: 2025-01-15
+
+// 定义检测参数
+const RATE_THRESHOLD = 100;  // 请求阈值（次/秒）
+const LIMIT_RATE = 50;       // 限制速率（次/秒）
+const DURATION = 300;        // 限制持续时间（秒）
+const WINDOW_SIZE = 60;      // 检测窗口（秒）
+
+// 主要检测逻辑
+if (source_ip.request_rate > RATE_THRESHOLD per second) {
+    // 记录攻击事件
+    log("HTTP Flood detected", {
+        source_ip: source_ip,
+        request_rate: source_ip.request_rate,
+        user_agent: request.user_agent,
+        timestamp: now()
+    });
+    
+    // 执行限速措施
+    action = "rate_limit";
+    limit_rate = LIMIT_RATE;
+    duration = DURATION;
+    
+    // 发送告警通知
+    if (source_ip.request_rate > RATE_THRESHOLD * 2) {
+        send_alert("High volume HTTP Flood detected from " + source_ip);
+    }
+    
+    // 更新威胁情报
+    threat_intel.add_ip(source_ip, "http_flood", severity="medium");
+}`
+                },
+                'firewall': {
+                    name: 'IP黑白名单访问控制',
+                    type: 'firewall',
+                    priority: 'medium',
+                    condition: 'source_ip in blacklist || geo_country == "blocked"',
+                    action: 'block',
+                    duration: '86400',
+                    description: '基于IP黑白名单和地理位置的访问控制规则，支持动态更新和多维度过滤。',
+                    code: `// IP访问控制规则
+// 支持黑白名单、地理位置、ASN等多维度控制
+
+// 白名单检查
+if (source_ip in whitelist) {
+    action = "allow";
+    bypass_security_checks = true;
+    log("Whitelist IP access", {ip: source_ip});
+    return;
+}
+
+// 黑名单检查
+if (source_ip in blacklist) {
+    action = "block";
+    log("Blacklist IP blocked", {ip: source_ip});
+    return;
+}
+
+// 地理位置检查
+if (geo_country in blocked_countries) {
+    action = "block";
+    reason = "geo_blocked";
+    log("Geographic blocking", {
+        ip: source_ip,
+        country: geo_country
+    });
+}`
+                },
+                'monitor': {
+                    name: '系统性能监控规则',
+                    type: 'monitor',
+                    priority: 'medium',
+                    condition: 'bandwidth_usage > 80% || cpu_usage > 90%',
+                    action: 'alert',
+                    duration: '600',
+                    description: '监控系统关键指标，包括带宽使用率、CPU使用率、内存使用率等，超过阈值时及时告警。',
+                    code: `// 系统性能监控规则
+// 监控多个关键指标
+
+// 带宽监控
+if (network.bandwidth_usage > 80) {
+    send_alert("High bandwidth usage", {
+        current: network.bandwidth_usage,
+        threshold: 80,
+        severity: "warning"
+    });
+}
+
+// CPU监控
+if (system.cpu_usage > 90) {
+    send_alert("High CPU usage", {
+        current: system.cpu_usage,
+        threshold: 90,
+        severity: "critical"
+    });
+}
+
+// 内存监控
+if (system.memory_usage > 85) {
+    send_alert("High memory usage", {
+        current: system.memory_usage,
+        threshold: 85,
+        severity: "warning"
+    });
+}`
+                },
+                'access': {
+                    name: '用户访问权限控制',
+                    type: 'access',
+                    priority: 'high',
+                    condition: 'user_role != "admin" && access_resource == "sensitive"',
+                    action: 'redirect',
+                    duration: '3600',
+                    description: '基于用户角色和资源敏感度的访问控制，确保敏感资源只能被授权用户访问。',
+                    code: `// 用户访问权限控制
+// 基于角色和资源的精细化访问控制
+
+// 管理员全权限
+if (user_role === "admin") {
+    action = "allow";
+    return;
+}
+
+// 敏感资源保护
+if (access_resource.sensitivity === "high") {
+    if (!user_permissions.includes("sensitive_access")) {
+        action = "redirect";
+        redirect_url = "/access_denied";
+        log("Unauthorized access attempt", {
+            user: user_id,
+            resource: access_resource.name,
+            required_permission: "sensitive_access"
+        });
+    }
+}`
+                },
+                'rate-limit': {
+                    name: 'API请求限速规则',
+                    type: 'rate-limit',
+                    priority: 'medium',
+                    condition: 'api_calls_per_minute > user_tier_limit',
+                    action: 'limit',
+                    duration: '60',
+                    description: '根据用户等级限制API调用频率，防止滥用和保护系统稳定性。',
+                    code: `// API请求限速规则
+// 基于用户等级的动态限速
+
+// 获取用户等级限制
+const user_limits = {
+    "free": 100,      // 免费用户 100次/分钟
+    "premium": 1000,  // 付费用户 1000次/分钟
+    "enterprise": 10000 // 企业用户 10000次/分钟
+};
+
+const limit = user_limits[user_tier] || 100;
+
+if (api_calls_per_minute > limit) {
+    action = "rate_limit";
+    limit_rate = limit;
+    duration = 60;
+    
+    log("Rate limit exceeded", {
+        user: user_id,
+        tier: user_tier,
+        current_rate: api_calls_per_minute,
+        limit: limit
+    });
+    
+    // 返回限流信息
+    response_headers["X-RateLimit-Limit"] = limit;
+    response_headers["X-RateLimit-Remaining"] = Math.max(0, limit - api_calls_per_minute);
+}`
+                },
+                'schedule': {
+                    name: '定时维护窗口规则',
+                    type: 'schedule',
+                    priority: 'low',
+                    condition: 'maintenance_window && current_time in maintenance_hours',
+                    action: 'redirect',
+                    duration: '7200',
+                    description: '在预定维护时间窗口内重定向用户访问到维护页面。',
+                    code: `// 定时维护窗口规则
+// 在维护期间重定向用户
+
+const maintenance_hours = [
+    {start: "02:00", end: "04:00", timezone: "UTC"},
+    {start: "14:00", end: "16:00", timezone: "UTC", weekdays: ["Sunday"]}
+];
+
+function isMaintenanceTime() {
+    const now = new Date();
+    const current_hour = now.getUTCHours();
+    const current_day = now.getUTCDay();
+    
+    for (let window of maintenance_hours) {
+        const start_hour = parseInt(window.start.split(':')[0]);
+        const end_hour = parseInt(window.end.split(':')[0]);
+        
+        if (current_hour >= start_hour && current_hour < end_hour) {
+            if (window.weekdays && !window.weekdays.includes(getDayName(current_day))) {
+                continue;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+if (maintenance_enabled && isMaintenanceTime()) {
+    action = "redirect";
+    redirect_url = "/maintenance";
+    response_code = 503;
+}`
+                }
+            };
+            
+            const template = templates[category];
+            if (template) {
+                const form = document.getElementById('ruleForm');
+                const inputs = form.querySelectorAll('input, select, textarea');
+                
+                // 更新表单字段
+                form.querySelector('input[placeholder*="规则名称"]').value = template.name;
+                form.querySelector('select').value = template.type;
+                form.querySelectorAll('select')[1].value = template.priority;
+                form.querySelector('input[placeholder*="请求频率"]').value = template.condition;
+                form.querySelectorAll('select')[2].value = template.action;
+                form.querySelector('input[type="number"]').value = template.duration;
+                form.querySelector('textarea[placeholder*="描述"]').value = template.description;
+                form.querySelector('textarea[placeholder*="规则代码"]').value = template.code;
+                
+                // 添加加载动画效果
+                form.style.opacity = '0.5';
+                setTimeout(() => {
+                    form.style.opacity = '1';
+                }, 300);
+            }
+        }
+        
+        // 更新统计数据
+        function updateStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            const statChanges = document.querySelectorAll('.stat-change');
+            
+            // 生成随机变化
+            const baseValues = [156, 48, 92, 34, 23, 97.2];
+            const variations = [
+                Math.floor(Math.random() * 10 - 3),  // 活跃规则
+                Math.floor(Math.random() * 4 - 1),   // DDoS规则
+                Math.floor(Math.random() * 6 - 2),   // 防火墙规则
+                Math.floor(Math.random() * 3 - 1),   // 监控规则
+                Math.floor(Math.random() * 2),       // 自定义规则
+                (Math.random() * 2 - 1).toFixed(1)   // 执行效率
+            ];
+            
+            statValues.forEach((stat, index) => {
+                if (index < baseValues.length) {
+                    const currentValue = baseValues[index] + variations[index];
+                    if (index === 5) {
+                        stat.innerHTML = `${Math.max(95, currentValue)}<span style="font-size: 16px;">%</span>`;
+                    } else {
+                        stat.textContent = Math.max(0, currentValue);
+                    }
+                    
+                    // 更新变化指示器
+                    if (statChanges[index] && variations[index] !== 0) {
+                        const change = variations[index];
+                        statChanges[index].textContent = change > 0 ? `+${change}` : `${change}`;
+                        statChanges[index].className = `stat-change ${change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral'}`;
+                    }
+                }
+            });
+        }
+        
+        // 规则编辑器功能增强
+        function saveRule() {
+            const form = document.getElementById('ruleForm');
+            const formData = new FormData(form);
+            
+            // 添加保存动画
+            const saveBtn = document.querySelector('.editor-btn.btn-primary');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '保存中...';
+            saveBtn.disabled = true;
+            
+            // 模拟保存过程
+            setTimeout(() => {
+                saveBtn.textContent = '已保存';
+                saveBtn.style.background = '#38a169';
+                
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.style.background = '';
+                    saveBtn.disabled = false;
+                }, 1500);
+            }, 1000);
+            
+            // 显示成功消息
+            showNotification('规则保存成功！', 'success');
+        }
+        
+        function testRule() {
+            const testBtn = document.querySelector('.editor-btn.btn-success');
+            const originalText = testBtn.textContent;
+            testBtn.textContent = '测试中...';
+            testBtn.disabled = true;
+            
+            // 模拟测试过程
+            setTimeout(() => {
+                const success = Math.random() > 0.2; // 80% 成功率
+                testBtn.textContent = success ? '测试通过' : '测试失败';
+                testBtn.style.background = success ? '#38a169' : '#e53e3e';
+                
+                showNotification(
+                    success ? '规则测试通过，逻辑正确！' : '规则测试失败，请检查语法！',
+                    success ? 'success' : 'error'
+                );
+                
+                setTimeout(() => {
+                    testBtn.textContent = originalText;
+                    testBtn.style.background = '';
+                    testBtn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+        
+        function resetRule() {
+            if (confirm('确定要重置规则内容吗？所有修改将丢失。')) {
+                const form = document.getElementById('ruleForm');
+                const category = document.querySelector('.category-item.active').onclick.toString().match(/switchCategory\('(.+?)'\)/)[1];
+                loadRuleTemplate(category);
+                showNotification('规则已重置', 'info');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            
+            const colors = {
+                'success': '#38a169',
+                'error': '#e53e3e',
+                'warning': '#d69e2e',
+                'info': '#3182ce'
+            };
+            
+            notification.style.background = colors[type] || colors.info;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // 自动消失
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 初始化编辑器按钮事件
+        function initializeEditor() {
+            document.querySelector('.editor-btn.btn-primary').onclick = saveRule;
+            document.querySelector('.editor-btn.btn-success').onclick = testRule;
+            document.querySelector('.editor-btn.btn-warning').onclick = resetRule;
+        }
+        
+        // 分类计数实时更新
+        function updateCategoryCounts() {
+            const counts = document.querySelectorAll('.category-count');
+            const baseValues = [48, 92, 34, 67, 29, 23, 15, 12, 8];
+            
+            counts.forEach((count, index) => {
+                if (index < baseValues.length) {
+                    const variation = Math.floor(Math.random() * 3 - 1);
+                    count.textContent = Math.max(0, baseValues[index] + variation);
+                }
+            });
+        }
+        
+        // 定时更新统计数据
+        setInterval(() => {
+            updateStats();
+            updateCategoryCounts();
+        }, 15000);
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            initializeEditor();
+            
+            // 添加表单输入动画效果
+            const formInputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+        });
+        
+        // 初始化路由管理器
+        const router = new DDoSeekRouter('rule-config');
+    </script>
+    <script src="router.js"></script>
+</body>
+</html> 

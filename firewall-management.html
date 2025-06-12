@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDoSeek - 防火墙管理</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f7fafc 100%);
+            color: #2d3748;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 毛玻璃效果基础样式 */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(24, 144, 255, 0.6);
+        }
+
+        /* 顶部导航栏 */
+        .top-navbar {
+            height: 64px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1890ff;
+        }
+
+        .logo i {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #4a5568;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890ff, #52c41a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 左侧边栏 */
+        /* 左侧边栏 - 统一样式 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            bottom: 0;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 24px 0;
+            z-index: 999;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 4px 16px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(24, 144, 255, 0.1);
+            color: #1890ff;
+            transform: translateX(2px);
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* 页面标题区域 */
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .firewall-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(56, 161, 105, 0.2);
+            color: #38a169;
+
+            position: relative;
+            overflow: hidden;
+        }
+
+        .firewall-status::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: statusSweep 2s infinite;
+        }
+
+        @keyframes statusSweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .action-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #3182ce, #2c5282); color: white; }
+        .btn-success { background: linear-gradient(135deg, #38a169, #2f855a); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #d69e2e, #b7791f); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #e53e3e, #c53030); color: white; }
+
+        /* 防火墙概览区域 */
+        .firewall-overview-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .firewall-kpi-card {
+            padding: 24px;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .firewall-kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(24, 144, 255, 0.8);
+        }
+
+        .firewall-kpi-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: iconShine 2s infinite;
+        }
+
+        @keyframes iconShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .kpi-value-container {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-value-large {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .kpi-change.positive {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+        }
+
+        .kpi-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #e53e3e;
+        }
+
+        .kpi-change.neutral {
+            background: rgba(113, 128, 150, 0.1);
+            color: #718096;
+        }
+
+        .kpi-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-subtitle {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .kpi-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.active { background: #22c55e; }
+        .status-dot.warning { background: #f59e0b; }
+        .status-dot.danger { background: #ef4444; }
+
+        /* 主监控区域 */
+        .main-monitoring-section {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+            min-height: 500px;
+        }
+
+        .monitoring-panel {
+            padding: 20px;
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .panel-subtitle {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .main-monitoring-section {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* 响应式设计 - 统一标准 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                transition: margin-left 0.3s ease;
+            }
+            
+            .firewall-overview-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            DDoSeek
+        </div>
+        <div class="user-section">
+            <i class="fas fa-bell" style="cursor: pointer; color: #faad14;"></i>
+            <div class="user-avatar">A</div>
+            <span>管理员</span>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="ddos-detection.html"><i class="fas fa-shield-virus"></i>DDoS检测防护</a></li>
+            <li><a href="deepseek-assistant.html"><i class="fas fa-robot"></i>DeepSeek AI助手</a></li>
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i>系统仪表盘</a></li>
+            <li><a href="network-monitor.html"><i class="fas fa-network-wired"></i>网络监测中心</a></li>
+            <li><a href="firewall-management.html" class="active"><i class="fas fa-fire-extinguisher"></i>防火墙管理</a></li>
+            <li><a href="log-center.html"><i class="fas fa-file-alt"></i>智能日志中心</a></li>
+            <li><a href="rule-config.html"><i class="fas fa-cogs"></i>规则配置中心</a></li>
+            <li><a href="system-test.html"><i class="fas fa-vial"></i>系统测试平台</a></li>
+        </ul>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" style="margin-bottom: 16px; font-size: 12px; color: #718096;">
+            <span><i class="fas fa-home"></i> 首页</span>
+            <span style="margin: 0 8px;">/</span>
+            <span><a href="dashboard.html" style="color: #718096; text-decoration: none;">系统仪表盘</a></span>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #3182ce; font-weight: 500;">防火墙管理</span>
+        </nav>
+
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <div class="page-title">
+                <i class="fas fa-fire-extinguisher"></i>
+                防火墙管理
+                <div class="firewall-status">防火墙启用</div>
+            </div>
+            <div class="action-controls">
+                <button class="action-btn btn-success">
+                    <i class="fas fa-plus"></i> 添加规则
+                </button>
+                <button class="action-btn btn-primary">
+                    <i class="fas fa-cog"></i> 防火墙配置
+                </button>
+                <button class="action-btn btn-warning">
+                    <i class="fas fa-download"></i> 导出配置
+                </button>
+                <button class="action-btn btn-danger">
+                    <i class="fas fa-power-off"></i> 紧急关闭
+                </button>
+            </div>
+        </div>
+
+        <!-- 防火墙概览区域 -->
+        <section class="firewall-overview-section">
+            <div class="firewall-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">活跃规则数</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #3182ce, #63b3ed);">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #3182ce;">2,847</div>
+                    <div class="kpi-change positive">+12</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">入站+出站规则</div>
+                    <div class="kpi-status">
+                        <span class="status-dot active"></span>
+                        <span>正常</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="firewall-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">拦截成功率</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #38a169, #68d391);">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #38a169;">99.8%</div>
+                    <div class="kpi-change positive">+0.1%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">24小时拦截效果</div>
+                    <div class="kpi-status">
+                        <span class="status-dot active"></span>
+                        <span>优秀</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="firewall-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">流量处理量</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #805ad5, #b794f6);">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #805ad5;">1.2TB</div>
+                    <div class="kpi-change positive">+8%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">今日处理流量</div>
+                    <div class="kpi-status">
+                        <span class="status-dot active"></span>
+                        <span>正常</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="firewall-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">威胁拦截数</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #e53e3e, #f56565);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #e53e3e;">3,456</div>
+                    <div class="kpi-change positive">+24</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">过去24小时</div>
+                    <div class="kpi-status">
+                        <span class="status-dot warning"></span>
+                        <span>关注</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="firewall-kpi-card glass-effect">
+                <div class="kpi-header">
+                    <span class="kpi-label">系统性能</span>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #d69e2e, #f6ad55);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="kpi-value-large" style="color: #d69e2e;">68%</div>
+                    <div class="kpi-change negative">+5%</div>
+                </div>
+                <div class="kpi-bottom">
+                    <div class="kpi-subtitle">CPU占用率</div>
+                    <div class="kpi-status">
+                        <span class="status-dot warning"></span>
+                        <span>偏高</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主监控区域 -->
+        <section class="main-monitoring-section">
+            <!-- 防火墙规则管理面板 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">防火墙规则管理</div>
+                        <div class="panel-subtitle">当前活跃规则列表</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="action-btn btn-primary" style="padding: 4px 8px; font-size: 10px;">
+                            <i class="fas fa-plus"></i> 新增
+                        </button>
+                        <button class="action-btn btn-warning" style="padding: 4px 8px; font-size: 10px;">
+                            <i class="fas fa-edit"></i> 批量编辑
+                        </button>
+                    </div>
+                </div>
+                <div style="overflow-y: auto; max-height: 420px;">
+                    <div class="rule-item" style="padding: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.9); border-left: 4px solid #38a169; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2d3748; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 16px; height: 16px; border-radius: 4px; background: #38a169; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px;">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    允许 HTTP/HTTPS 流量
+                                </div>
+                                <div style="font-size: 11px; color: #718096; margin-bottom: 8px;">
+                                    <i class="fas fa-clock"></i> 创建时间：2025-01-15 09:30:25 | 最后修改：2小时前
+                                </div>
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(56, 161, 105, 0.2); color: #38a169;">允许</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">来源地址</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600; font-family: monospace;">任意 (0.0.0.0/0)</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">目标端口</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600; font-family: monospace;">80, 443</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">协议类型</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600;">TCP</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">匹配次数</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600;">125,847</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 6px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;" class="rule-actions">
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #3182ce, #2c5282); color: white;">编辑</button>
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #d69e2e, #b7791f); color: white;">禁用</button>
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #e53e3e, #c53030); color: white;">删除</button>
+                        </div>
+                    </div>
+
+                    <div class="rule-item" style="padding: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.9); border-left: 4px solid #e53e3e; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2d3748; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 16px; height: 16px; border-radius: 4px; background: #e53e3e; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px;">
+                                        <i class="fas fa-ban"></i>
+                                    </div>
+                                    阻止恶意IP段访问
+                                </div>
+                                <div style="font-size: 11px; color: #718096; margin-bottom: 8px;">
+                                    <i class="fas fa-clock"></i> 创建时间：2025-01-15 14:22:18 | 最后修改：30分钟前
+                                </div>
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(229, 62, 62, 0.2); color: #e53e3e;">拒绝</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">来源地址</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600; font-family: monospace;">103.45.67.0/24</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">目标端口</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600; font-family: monospace;">所有端口</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">协议类型</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600;">所有协议</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">匹配次数</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600;">2,456</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 6px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;" class="rule-actions">
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #3182ce, #2c5282); color: white;">编辑</button>
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #38a169, #2f855a); color: white;">启用</button>
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #e53e3e, #c53030); color: white;">删除</button>
+                        </div>
+                    </div>
+
+                    <div class="rule-item" style="padding: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.9); border-left: 4px solid #d69e2e; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2d3748; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 16px; height: 16px; border-radius: 4px; background: #d69e2e; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px;">
+                                        <i class="fas fa-exclamation"></i>
+                                    </div>
+                                    限制SSH访问频率
+                                </div>
+                                <div style="font-size: 11px; color: #718096; margin-bottom: 8px;">
+                                    <i class="fas fa-clock"></i> 创建时间：2025-01-15 11:15:42 | 最后修改：1小时前
+                                </div>
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(214, 158, 46, 0.2); color: #d69e2e;">限流</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">来源地址</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600; font-family: monospace;">任意外网IP</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">目标端口</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600; font-family: monospace;">22</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">频率限制</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600;">5次/分钟</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 10px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">触发次数</span>
+                                <div style="font-size: 12px; color: #2d3748; font-weight: 600;">127</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 6px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;" class="rule-actions">
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #3182ce, #2c5282); color: white;">编辑</button>
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #d69e2e, #b7791f); color: white;">禁用</button>
+                            <button style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #e53e3e, #c53030); color: white;">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 流量监控图表 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">实时流量监控</div>
+                        <div class="panel-subtitle">网络流量统计与分析</div>
+                    </div>
+                </div>
+                <div id="trafficChart" style="height: 200px; margin-bottom: 20px;"></div>
+                <div id="protocolChart" style="height: 200px;"></div>
+            </div>
+
+            <!-- 安全事件面板 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">安全事件中心</div>
+                        <div class="panel-subtitle">实时安全告警</div>
+                    </div>
+                </div>
+                <div style="overflow-y: auto; max-height: 420px;">
+                    <div style="padding: 14px; margin-bottom: 10px; background: rgba(229, 62, 62, 0.05); border-left: 4px solid #e53e3e; border-radius: 8px; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="font-weight: 700; font-size: 13px; color: #e53e3e; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                高危端口扫描检测
+                            </div>
+                            <span style="padding: 3px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; background: rgba(229, 62, 62, 0.2); color: #e53e3e; text-transform: uppercase;">高危</span>
+                        </div>
+                        <div style="font-size: 11px; color: #718096; margin-bottom: 8px; line-height: 1.4;">检测到来自 198.51.100.45 的大规模端口扫描行为，已触发自动拦截规则</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0;">
+                            <span><i class="fas fa-clock"></i> 2分钟前</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 美国·弗吉尼亚</span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 14px; margin-bottom: 10px; background: rgba(214, 158, 46, 0.05); border-left: 4px solid #d69e2e; border-radius: 8px; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="font-weight: 700; font-size: 13px; color: #d69e2e; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-shield-alt"></i>
+                                异常登录尝试
+                            </div>
+                            <span style="padding: 3px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; background: rgba(214, 158, 46, 0.2); color: #d69e2e; text-transform: uppercase;">中危</span>
+                        </div>
+                        <div style="font-size: 11px; color: #718096; margin-bottom: 8px; line-height: 1.4;">SSH服务检测到来自多个IP的暴力破解尝试，已启用临时封禁策略</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0;">
+                            <span><i class="fas fa-clock"></i> 5分钟前</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 俄罗斯·莫斯科</span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 14px; margin-bottom: 10px; background: rgba(49, 130, 206, 0.05); border-left: 4px solid #3182ce; border-radius: 8px; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="font-weight: 700; font-size: 13px; color: #3182ce; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-info-circle"></i>
+                                规则自动优化
+                            </div>
+                            <span style="padding: 3px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; background: rgba(49, 130, 206, 0.2); color: #3182ce; text-transform: uppercase;">信息</span>
+                        </div>
+                        <div style="font-size: 11px; color: #718096; margin-bottom: 8px; line-height: 1.4;">AI引擎自动优化了3条防火墙规则，预计性能提升15%</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0;">
+                            <span><i class="fas fa-clock"></i> 8分钟前</span>
+                            <span><i class="fas fa-robot"></i> 系统自动</span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 14px; margin-bottom: 10px; background: rgba(56, 161, 105, 0.05); border-left: 4px solid #38a169; border-radius: 8px; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="font-weight: 700; font-size: 13px; color: #38a169; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-check-circle"></i>
+                                配置备份完成
+                            </div>
+                            <span style="padding: 3px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; background: rgba(56, 161, 105, 0.2); color: #38a169; text-transform: uppercase;">成功</span>
+                        </div>
+                        <div style="font-size: 11px; color: #718096; margin-bottom: 8px; line-height: 1.4;">防火墙配置已成功备份到远程存储，备份文件大小: 2.3MB</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0;">
+                            <span><i class="fas fa-clock"></i> 15分钟前</span>
+                            <span><i class="fas fa-cloud"></i> 云端备份</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详细分析区域 -->
+        <section style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            <!-- 防火墙规则详情表格 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div class="panel-title">防火墙规则统计</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(0, 0, 0, 0.03); font-weight: 600; font-size: 12px; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">规则名称</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(0, 0, 0, 0.03); font-weight: 600; font-size: 12px; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">类型</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(0, 0, 0, 0.03); font-weight: 600; font-size: 12px; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">端口/协议</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(0, 0, 0, 0.03); font-weight: 600; font-size: 12px; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">匹配次数</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(0, 0, 0, 0.03); font-weight: 600; font-size: 12px; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">允许HTTP/HTTPS</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">入站允许</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">80,443/TCP</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">125,847</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);"><span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(56, 161, 105, 0.2); color: #38a169;">启用</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">阻止恶意IP段</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">入站拒绝</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">全部/全部</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">2,456</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);"><span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(229, 62, 62, 0.2); color: #e53e3e;">启用</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">SSH访问限制</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">频率限制</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">22/TCP</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">127</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);"><span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(214, 158, 46, 0.2); color: #d69e2e;">限流</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">内网通信允许</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">双向允许</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">全部/全部</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">876,234</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);"><span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(56, 161, 105, 0.2); color: #38a169;">启用</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">DNS查询允许</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">出站允许</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">53/UDP</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">45,623</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);"><span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(56, 161, 105, 0.2); color: #38a169;">启用</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">FTP服务拒绝</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">入站拒绝</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">21/TCP</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);">89</td>
+                            <td style="padding: 12px; font-size: 13px; color: #4a5568; border-bottom: 1px solid rgba(0, 0, 0, 0.1);"><span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(113, 128, 150, 0.2); color: #718096;">禁用</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 智能优化建议 -->
+            <div class="monitoring-panel glass-effect">
+                <div class="panel-header">
+                    <div class="panel-title">配置优化建议</div>
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <div style="padding: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.95); border-left: 4px solid #e53e3e; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #2d3748; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">🔥</span>
+                                    性能瓶颈优化
+                                </div>
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(239, 68, 68, 0.15); color: #c53030; border: 1px solid rgba(239, 68, 68, 0.3);">高优先级</span>
+                        </div>
+                        <div style="font-size: 12px; color: #4a5568; line-height: 1.6; margin-bottom: 12px;">当前规则处理效率较低，建议合并相似规则并重新排序，预计可提升35%的处理性能。</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #718096; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span>预期效果:</span>
+                                <div style="width: 40px; height: 4px; background: rgba(0, 0, 0, 0.1); border-radius: 2px; overflow: hidden;">
+                                    <div style="height: 100%; background: linear-gradient(90deg, #38a169, #68d391); border-radius: 2px; width: 88%;"></div>
+                                </div>
+                                <span>88%</span>
+                            </div>
+                            <span>2小时前</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;" class="suggestion-actions">
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #38a169, #2f855a); color: white;">立即应用</button>
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #3182ce, #2c5282); color: white;">查看详情</button>
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #718096, #4a5568); color: white;">忽略</button>
+                        </div>
+                    </div>
+
+                    <div style="padding: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.95); border-left: 4px solid #d69e2e; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #2d3748; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">⚡</span>
+                                    规则重复检测
+                                </div>
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(214, 158, 46, 0.15); color: #b7791f; border: 1px solid rgba(214, 158, 46, 0.3);">中优先级</span>
+                        </div>
+                        <div style="font-size: 12px; color: #4a5568; line-height: 1.6; margin-bottom: 12px;">发现7条功能重复的防火墙规则，建议合并以简化配置并降低资源消耗。</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #718096; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span>预期效果:</span>
+                                <div style="width: 40px; height: 4px; background: rgba(0, 0, 0, 0.1); border-radius: 2px; overflow: hidden;">
+                                    <div style="height: 100%; background: linear-gradient(90deg, #38a169, #68d391); border-radius: 2px; width: 75%;"></div>
+                                </div>
+                                <span>75%</span>
+                            </div>
+                            <span>1小时前</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;" class="suggestion-actions">
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #38a169, #2f855a); color: white;">立即应用</button>
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #3182ce, #2c5282); color: white;">查看详情</button>
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #718096, #4a5568); color: white;">忽略</button>
+                        </div>
+                    </div>
+
+                    <div style="padding: 16px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.95); border-left: 4px solid #3182ce; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #2d3748; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">🛡️</span>
+                                    安全策略加强
+                                </div>
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(49, 130, 206, 0.15); color: #2c5282; border: 1px solid rgba(49, 130, 206, 0.3);">低优先级</span>
+                        </div>
+                        <div style="font-size: 12px; color: #4a5568; line-height: 1.6; margin-bottom: 12px;">建议启用地理位置过滤和深度包检测，可进一步提升安全防护能力。</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #718096; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span>预期效果:</span>
+                                <div style="width: 40px; height: 4px; background: rgba(0, 0, 0, 0.1); border-radius: 2px; overflow: hidden;">
+                                    <div style="height: 100%; background: linear-gradient(90deg, #38a169, #68d391); border-radius: 2px; width: 92%;"></div>
+                                </div>
+                                <span>92%</span>
+                            </div>
+                            <span>30分钟前</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;" class="suggestion-actions">
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #38a169, #2f855a); color: white;">立即应用</button>
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #3182ce, #2c5282); color: white;">查看详情</button>
+                            <button style="padding: 6px 12px; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; background: linear-gradient(135deg, #718096, #4a5568); color: white;">忽略</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // 流量监控图表
+        const trafficChart = echarts.init(document.getElementById('trafficChart'));
+        const trafficOption = {
+            backgroundColor: 'transparent',
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.3)' }},
+                axisLabel: { color: '#4a5568', fontSize: 10 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: { lineStyle: { color: 'rgba(0,0,0,0.3)' }},
+                axisLabel: { color: '#4a5568', fontSize: 10 },
+                splitLine: { lineStyle: { color: 'rgba(0,0,0,0.1)' }}
+            },
+            series: [
+                {
+                    name: '入站流量',
+                    type: 'line',
+                    data: [120, 150, 200, 180, 220, 190, 240, 210],
+                    smooth: true,
+                    lineStyle: { color: '#3182ce', width: 3 },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(49,130,206,0.4)' },
+                            { offset: 1, color: 'rgba(49,130,206,0.1)' }
+                        ])
+                    }
+                },
+                {
+                    name: '出站流量',
+                    type: 'line',
+                    data: [80, 90, 110, 100, 130, 120, 150, 140],
+                    smooth: true,
+                    lineStyle: { color: '#38a169', width: 3 },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(56,161,105,0.4)' },
+                            { offset: 1, color: 'rgba(56,161,105,0.1)' }
+                        ])
+                    }
+                }
+            ]
+        };
+        trafficChart.setOption(trafficOption);
+
+        // 协议分布图表
+        const protocolChart = echarts.init(document.getElementById('protocolChart'));
+        const protocolOption = {
+            backgroundColor: 'transparent',
+            legend: {
+                bottom: '5%',
+                left: 'center',
+                textStyle: { color: '#4a5568', fontSize: 10 }
+            },
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['30%', '60%'],
+                    center: ['50%', '40%'],
+                    data: [
+                        { value: 45, name: 'HTTP/HTTPS', itemStyle: { color: '#3182ce' }},
+                        { value: 25, name: 'TCP', itemStyle: { color: '#38a169' }},
+                        { value: 15, name: 'UDP', itemStyle: { color: '#805ad5' }},
+                        { value: 10, name: 'SSH', itemStyle: { color: '#d69e2e' }},
+                        { value: 5, name: '其他', itemStyle: { color: '#e53e3e' }}
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.3)'
+                        }
+                    },
+                    label: {
+                        color: '#4a5568',
+                        fontSize: 10
+                    }
+                }
+            ]
+        };
+        protocolChart.setOption(protocolOption);
+
+        // 响应式图表调整
+        window.addEventListener('resize', function() {
+            trafficChart.resize();
+            protocolChart.resize();
+        });
+
+        // 规则项目悬停效果
+        const ruleItems = document.querySelectorAll('.rule-item');
+        ruleItems.forEach(item => {
+            const actions = item.querySelector('.rule-actions');
+            
+            item.addEventListener('mouseenter', () => {
+                if (actions) {
+                    actions.style.opacity = '1';
+                    actions.style.transform = 'translateY(0)';
+                }
+                item.style.background = 'rgba(255, 255, 255, 1)';
+                item.style.transform = 'translateX(8px) translateY(-2px)';
+                item.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.12)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                if (actions) {
+                    actions.style.opacity = '0';
+                    actions.style.transform = 'translateY(10px)';
+                }
+                item.style.background = '';
+                item.style.transform = '';
+                item.style.boxShadow = '';
+            });
+        });
+
+        // 建议项目悬停效果
+        const suggestionItems = document.querySelectorAll('.monitoring-panel:last-child > div > div');
+        suggestionItems.forEach(item => {
+            const actions = item.querySelector('.suggestion-actions');
+            
+            item.addEventListener('mouseenter', () => {
+                if (actions) {
+                    actions.style.opacity = '1';
+                    actions.style.transform = 'translateY(0)';
+                }
+                item.style.transform = 'translateY(-4px)';
+                item.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.12)';
+                item.style.background = 'rgba(255, 255, 255, 1)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                if (actions) {
+                    actions.style.opacity = '0';
+                    actions.style.transform = 'translateY(10px)';
+                }
+                item.style.transform = '';
+                item.style.boxShadow = '';
+                item.style.background = '';
+            });
+        });
+
+        // 模拟实时数据更新
+        function updateFirewallData() {
+            // 更新KPI数据
+            const kpiValues = document.querySelectorAll('.kpi-value-large');
+            if (kpiValues.length >= 5) {
+                kpiValues[0].textContent = (Math.floor(Math.random() * 100 + 2800)).toLocaleString();
+                kpiValues[1].textContent = (Math.random() * 0.5 + 99.5).toFixed(1) + '%';
+                kpiValues[2].textContent = (Math.random() * 0.3 + 1.0).toFixed(1) + 'TB';
+                kpiValues[3].textContent = Math.floor(Math.random() * 500 + 3000).toLocaleString();
+                kpiValues[4].textContent = Math.floor(Math.random() * 20 + 60) + '%';
+            }
+
+            // 更新图表数据
+            const newTrafficData1 = Array.from({length: 8}, () => Math.floor(Math.random() * 100 + 150));
+            const newTrafficData2 = Array.from({length: 8}, () => Math.floor(Math.random() * 80 + 100));
+            trafficChart.setOption({
+                series: [
+                    { data: newTrafficData1 },
+                    { data: newTrafficData2 }
+                ]
+            });
+        }
+
+        // 模拟安全事件闪烁
+        function simulateSecurityAlert() {
+            const eventItems = document.querySelectorAll('.monitoring-panel:last-child > div > div');
+            if (eventItems.length > 0) {
+                const randomItem = eventItems[Math.floor(Math.random() * eventItems.length)];
+                randomItem.style.animation = 'pulse 2s ease-in-out 3';
+                setTimeout(() => {
+                    randomItem.style.animation = '';
+                }, 6000);
+            }
+        }
+
+        // 定时更新数据
+        setInterval(updateFirewallData, 5000);
+        setInterval(simulateSecurityAlert, 8000);
+
+        // 初始化数据更新
+        updateFirewallData();
+
+        // 初始化路由管理器
+        const router = new DDoSeekRouter('firewall-management');
+    </script>
+    <script src="router.js"></script>
+</body>
+</html>
