@@ -1,0 +1,298 @@
+{% load static %}
+
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>SDN 智能防火墙管理系统</title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="{% static "plugins/fontawesome-free/css/all.min.css" %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static "dist/css/adminlte.min.css" %}">
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <!-- toastr -->
+  <link rel="stylesheet" href="{% static "plugins/toastr/toastr.min.css" %}">
+
+</head>
+<body class="hold-transition sidebar-mini {{ collapse }}">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="javascript:void(0)" role="button" id="collapse">
+          <i class="fas {{ icon }}" ></i>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="../" role="button" id="home"><i class="fas fa-home"></i></a>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="../" class="brand-link" id="brand">
+      <span class="brand-text nav-icon fas fa-shield-alt" style="margin: 0 .3rem 0 .8rem;"></span>
+      <span class="brand-text font-weight-light"><small><b>Archon</b> The Ether Escort</small></span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item has-treeview {{ menuopen.0 }}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-map-signs"></i>
+              <p>
+                日志管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="firewall_log">
+                  <i class="fas nav-icon"></i>
+                  <p>防火墙日志</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="ids_log">
+                  <i class="fas nav-icon"></i>
+                  <p>入侵检测日志</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url active" style="background-color:rgba(255,255,255,.05); color:#fff" id="admin_log">
+                  <i class="fas nav-icon"></i>
+                  <p>管理日志</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item has-treeview {{ menuopen.1 }}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-calendar-minus"></i>
+              <p>
+                规则管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="firewall_rule">
+                  <i class="fas nav-icon"></i>
+                  <p>防火墙规则</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="ids_rule">
+                  <i class="fas nav-icon"></i>
+                  <p>入侵检测规则</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="traffic_statistic">
+              <i class="nav-icon fas fa-chart-bar"></i>
+              <p>
+                流量统计
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="node_state">
+              <i class="nav-icon fas fa-th-list"></i>
+              <p>
+                节点状态
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="delay">
+              <i class="nav-icon fas fa-clock "></i>
+              <p>
+                网络时延
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="topo">
+              <i class="nav-icon fas fa-tree "></i>
+              <p>
+                网络拓扑
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="system_test">
+              <i class="nav-icon fas fa-wrench "></i>
+              <p>
+                系统测试
+              </p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+              {% if logs %}
+                <div class="timeline">
+                  {% for time, records in logs.items %}
+                    <div class="time-label">
+                      <span class="bg-success">&nbsp;{{ time }}&nbsp;</span>
+                    </div><!-- /.timeline-label -->
+                    {% for record in records %}
+                      <div>
+                        {% if record.event.type != "edit ids rule" %}
+                          <i class="fas fa-user bg-maroon"></i>
+                          <div class="timeline-item">
+                            <span class="time"><i class="fas fa-clock"></i> {{ record.timestamp }}</span>
+                            {% if record.event.type == "new rule" %}
+                              <h3 class="timeline-header text-sm">在规则[ {{ record.event.over_rule_id }} ]上方新建防火墙规则[ {{ record.event.rule_id }} ]</h3>
+                            {% elif record.event.type == "edit rule" %}
+                              <h3 class="timeline-header text-sm">编辑防火墙规则[ {{ record.event.over_rule_id }} ]为规则[ {{ record.event.rule_id }} ]</h3>
+                            {% elif record.event.type == "remove rule" %}
+                              <h3 class="timeline-header text-sm">删除防火墙规则[ {{ record.event.rule_id }} ]</h3>
+                            {% elif record.event.type == "up rule" %}
+                              <h3 class="timeline-header text-sm">上移防火墙规则[ {{ record.event.rule_id }} ]</h3>
+                            {% endif %}
+                            
+                            {% if record.event.type == "new rule" or record.event.type == "edit rule" %}
+                            <div class="text-sm timeline-body p-1">
+                              <span class="ml-3"><b>规则[ {{ record.event.rule_id }} ]：</b>
+                              {% if record.event.action == "accept" %}
+                                <span class="badge bg-success">放行</span>
+                              {% elif record.event.action == "redirect" %}
+                                <span class="badge bg-primary">重定向</span>
+                              {% elif record.event.action == "drop" %}
+                                <span class="badge bg-danger">丢弃</span>
+                              {% endif %}
+                              </span>
+                              <strong><span class="mx-1">
+                                {% if record.event.s_ip == "any" %}
+                                  <span class="text-info">{{ record.event.s_ip }} : </span>
+                                {% else %}
+                                  {{ record.event.s_ip }} : 
+                                {% endif %}
+                                {% if record.event.s_port == "any" %}
+                                  <span class="text-info">{{ record.event.s_port }}</span>
+                                {% else %}
+                                  {{ record.event.s_port }}
+                                {% endif %}
+                              </span></strong>
+                              <span class="mx-1">--
+                              <strong><span class="mx-1">
+                                {% if record.event.d_ip == "any" %}
+                                  <span class="text-info">{{ record.event.d_ip }} : </span>
+                                {% else %}
+                                  {{ record.event.d_ip }} : 
+                                {% endif %}
+                                {% if record.event.d_port == "any" %}
+                                  <span class="text-info">{{ record.event.d_port }}</span>
+                                {% else %}
+                                  {{ record.event.d_port }}
+                                {% endif %}
+                              </span></strong>
+                            </div>
+                            {% endif %}
+                          </div>
+                        {% else %}
+                          <i class="fas fa-eye bg-warning"></i>
+                          <div class="timeline-item">
+                            <span class="time"><i class="fas fa-clock"></i> {{ record.timestamp }}</span>
+                            <h3 class="timeline-header text-sm">
+                              修改入侵检测规则：标签
+                              <b> {{ record.event.label }} </b>
+                              的响应策略改为
+                              {% if record.event.action == "alert" %}
+                                <span class="badge bg-info">告警</span>
+                              {% elif record.event.action == "redirect" %}
+                                <span class="badge bg-primary">重定向</span>
+                              {% elif record.event.action == "drop" %}
+                                <span class="badge bg-danger">丢弃</span>
+                              {% endif %}
+                            </h3>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                  <div>
+                    <i class="fas fa-clock bg-gray"></i>
+                  </div>
+                </div>
+              {% else %}
+                <div class="card text-sm">
+                  <div class="card-body p-0">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th style="width:100%">暂无管理事件</th>
+                        </tr>
+                      </thead>
+                    </table>
+                  </div>
+                </div>
+              {% endif %}
+              </div><!-- /.card-body -->                        
+            </div><!-- /.card -->
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div><!-- /.content-header -->   
+  </div><!-- /.content-wrapper -->
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+
+<!-- jQuery -->
+<script src="{% static "plugins/jquery/jquery.min.js" %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static "plugins/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static "dist/js/adminlte.min.js" %}"></script>
+<!-- toastr -->
+<script src="{% static "plugins/toastr/toastr.min.js" %}"></script>
+
+<!-- core -->
+<script src="{% static "core.js" %}"></script>
+
+<script>
+  // set url for locate-packet
+  $('.locate-packet').click(function() {
+
+      $(this).attr("href", "/core/traffic_statistic?target=" + $(this).attr('pkt') + "&" + getSidebarState());
+  });
+</script>
+
+</body>
+</html>

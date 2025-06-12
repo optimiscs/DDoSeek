@@ -1,0 +1,299 @@
+{% load static %}
+
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>SDN 智能防火墙管理系统</title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="{% static "plugins/fontawesome-free/css/all.min.css" %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static "dist/css/adminlte.min.css" %}">
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <!-- toastr -->
+  <link rel="stylesheet" href="{% static "plugins/toastr/toastr.min.css" %}">
+
+</head>
+<body class="hold-transition sidebar-mini {{ collapse }}">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="javascript:void(0)" role="button" id="collapse">
+          <i class="fas {{ icon }}" ></i>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="../" role="button" id="home"><i class="fas fa-home"></i></a>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="../" class="brand-link" id="brand">
+      <span class="brand-text nav-icon fas fa-shield-alt" style="margin: 0 .3rem 0 .8rem;"></span>
+      <span class="brand-text font-weight-light"><small><b>Archon</b> The Ether Escort</small></span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item has-treeview {{ menuopen.0 }}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-map-signs"></i>
+              <p>
+                日志管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="firewall_log">
+                  <i class="fas nav-icon"></i>
+                  <p>防火墙日志</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="ids_log">
+                  <i class="fas nav-icon"></i>
+                  <p>入侵检测日志</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="admin_log">
+                  <i class="fas nav-icon"></i>
+                  <p>管理日志</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item has-treeview {{ menuopen.1 }}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-calendar-minus"></i>
+              <p>
+                规则管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="firewall_rule">
+                  <i class="fas nav-icon"></i>
+                  <p>防火墙规则</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link dyn-url" id="ids_rule">
+                  <i class="fas nav-icon"></i>
+                  <p>入侵检测规则</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="traffic_statistic">
+              <i class="nav-icon fas fa-chart-bar"></i>
+              <p>
+                流量统计
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="node_state">
+              <i class="nav-icon fas fa-th-list"></i>
+              <p>
+                节点状态
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="delay">
+              <i class="nav-icon fas fa-clock "></i>
+              <p>
+                网络时延
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url" id="topo">
+              <i class="nav-icon fas fa-tree "></i>
+              <p>
+                网络拓扑
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link dyn-url active" style="background-color:rgba(255,255,255,.05); color:#fff" id="system_test">
+              <i class="nav-icon fas fa-wrench "></i>
+              <p>
+                系统测试
+              </p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header d-flex p-0">
+                  <h3 class="card-title p-3"><b> # 测试一：发送非攻击流量</b></h3>
+                  <ul class="nav nav-pills ml-auto p-2">
+                    <button class="btn btn-outline-primary" type="button" id="test1"><small><i class="fas fa-wrench"> 开始测试</i></small></button>
+                  </ul>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="before-test1">
+                      <div>本测试将在后台执行以下命令，其中test1.pcap文件包含4条非攻击流量：</div>
+                      <div class="text-danger"><b> sudo python dispatcher.py ./pcap/test1.pcap</b></div>
+                    </div><!-- /.tab-pane -->
+                    <div class="tab-pane" id="after-test1">
+                      <div>测试已完成。</div>
+                      <div class="text-danger">可在防火墙日志页面查看防火墙动作，在流量统计页面查看数据包信息，在节点状态页面查看交换机流表项。</div>
+                    </div><!-- /.tab-pane -->
+                  </div>
+                </div><!-- /.card-body -->
+              </div><!-- /.card -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header d-flex p-0">
+                  <h3 class="card-title p-3"><b> # 测试二：发送攻击流量</b></h3>
+                  <ul class="nav nav-pills ml-auto p-2">
+                    <button class="btn btn-outline-primary" type="button" id="test2"><small><i class="fas fa-wrench"> 开始测试</i></small></button>
+                  </ul>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="before-test2">
+                      <div>本测试将在后台执行以下命令，其中test2.pcap文件包含8条攻击流量：</div>
+                      <div class="text-danger"><b> sudo python dispatcher.py ./pcap/test2.pcap</b></div>
+                    </div><!-- /.tab-pane -->
+                    <div class="tab-pane" id="after-test2">
+                      <div>测试已完成。</div>
+                      <div class="text-danger">可在防火墙日志页面查看防火墙动作，在入侵检测日志页面查看入侵检测器动作，在流量统计页面查看数据包信息，在节点状态页面查看交换机流表项。</div>                    
+                    </div><!-- /.tab-pane -->
+                  </div>
+                </div><!-- /.card-body -->
+              </div><!-- /.card -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+          <div class="row justify-content-center" >
+            <ul class="nav nav-pills p-2">
+              <button class="btn btn-outline-primary" type="button" id="reset"><small><i class="fas fa-redo-alt"> 重启系统</i></small></button>
+            </ul>
+          </div>
+      </div><!-- /.container-fluid -->
+    </div><!-- /.content-header -->   
+  </div><!-- /.content-wrapper -->
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+
+<!-- jQuery -->
+<script src="{% static "plugins/jquery/jquery.min.js" %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static "plugins/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static "dist/js/adminlte.min.js" %}"></script>
+<!-- toastr -->
+<script src="{% static "plugins/toastr/toastr.min.js" %}"></script>
+
+<!-- core -->
+<script src="{% static "core.js" %}"></script>
+
+<script>
+  $(function() {
+    toastr.options = {positionClass:"toast-bottom-right",
+                      timeOut: "1500"};
+  });
+
+  $('#test1').click(function() {
+    $.ajax({
+      type: "POST",
+      url: "/core/test/1/",
+      beforeSend: function(xhr, settings) {
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+      },
+      success: function(response) {
+        $('#test1').attr('disabled', "");
+        $('#before-test1').removeClass('active');
+        $('#after-test1').addClass('active');
+        toastr.success("运行测试一成功");
+      },
+      error: function() {
+        toastr.error("运行测试一失败，请检查服务器状态");
+      }
+    });
+  });
+
+  $('#test2').click(function() {
+    $.ajax({
+      type: "POST",
+      url: "/core/test/2/",
+      beforeSend: function(xhr, settings) {
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+      },
+      success: function(response) {
+        $('#test2').attr('disabled', "");
+        $('#before-test2').removeClass('active');
+        $('#after-test2').addClass('active');
+        toastr.success("运行测试二成功");
+      },
+      error: function() {
+        toastr.error("运行测试二失败，请检查服务器状态");
+      }
+    });
+  });
+
+  $('#reset').click(function() {
+    $.ajax({
+      type: "POST",
+      url: "/core/reset/",
+      beforeSend: function(xhr, settings) {
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+      },
+      success: function(response) {
+        toastr.success("恢复初始配置成功");
+      },
+      error: function() {
+        $('#modal-confirm').modal('hide');
+        toastr.error("恢复初始配置失败，请检查服务器状态");
+      }
+    });
+  });
+</script>
+</body>
+</html>

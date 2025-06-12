@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDoSeek - DDoS攻击可视化监控大屏</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
+            color: #36a1bf;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10000;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #2a4d5f, #6fcdfe);
+            border: 1px solid rgba(55, 97, 121, 0.5);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(55, 97, 121, 0.3);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #2a4d5f, #a5d6f0);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(55, 97, 121, 0.5);
+        }
+
+        .back-button i {
+            font-size: 16px;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* iframe容器 */
+        .iframe-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            display: block;
+            margin: 0;
+            padding: 0;
+        }
+
+        #dataviFrame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            outline: none;
+            background: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 科技背景效果 */
+        .tech-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 157, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 加载动画 */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            color: #00d4ff;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            font-weight: bold;
+            animation: textPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* 隐藏加载动画 */
+        .loading.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 科技背景 -->
+    <div class="tech-background"></div>
+
+    <!-- 返回按钮 -->
+    <a href="dashboard.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        返回
+    </a>
+
+    <!-- 加载动画 -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载可视化大屏...</div>
+    </div>
+
+    <!-- iframe容器 -->
+    <div class="iframe-container">
+        <iframe 
+            id="dataviFrame"
+            src="https://b.datav.run/share/page/af3dbbf5415ba305b8d7e82bd9f087d7"
+            frameborder="0"
+            allowfullscreen
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation">
+        </iframe>
+    </div>
+
+    <script>
+        // iframe加载完成后隐藏加载动画
+        document.getElementById('dataviFrame').addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 500);
+        });
+
+        // 错误处理
+        document.getElementById('dataviFrame').addEventListener('error', function() {
+            document.getElementById('loading').innerHTML = `
+                <div style="color: #ff6b6b; text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                    <div>加载失败，请检查网络连接</div>
+                </div>
+            `;
+        });
+
+        // 返回按钮功能 - 固定返回到仪表板
+        document.querySelector('.back-button').addEventListener('click', function(e) {
+            // 直接跳转到仪表板，不使用preventDefault，让链接正常工作
+            // 这里可以添加确认对话框或其他逻辑（如果需要）
+        });
+
+        // 响应式处理
+        function handleResize() {
+            const iframe = document.getElementById('dataviFrame');
+            const container = document.querySelector('.iframe-container');
+            
+            // 确保iframe和容器始终全屏
+            iframe.style.width = window.innerWidth + 'px';
+            iframe.style.height = window.innerHeight + 'px';
+            container.style.width = window.innerWidth + 'px';
+            container.style.height = window.innerHeight + 'px';
+        }
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+        
+        // 初始调用
+        handleResize();
+    </script>
+</body>
+</html>

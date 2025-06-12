@@ -1,0 +1,6 @@
+id,s_ip,s_port,d_ip,d_port,action,timestamp,source
+10018,10.0.0.1,80,any,any,drop,08-26 18:07:59,firewall
+10013,10.0.0.2,60638,any,any,redirect,08-26 18:07:51,firewall
+10012,10.0.0.2,33654,any,any,drop,08-26 18:07:29,firewall
+10002,10.0.0.1,any,10.0.0.2,any,accept,09-01 20:00:00,initial
+10001,10.0.0.2,any,10.0.0.3,135,redirect,09-01 20:00:00,initial

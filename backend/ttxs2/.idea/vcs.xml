@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/SDN-Firewall" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/SDN-Firewall/smart_ids" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/SDN-Firewall/test/ryu" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/web_admin" vcs="Git" />
+  </component>
+</project>

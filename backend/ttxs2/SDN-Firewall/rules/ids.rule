@@ -1,0 +1,14 @@
+label,action
+BENIGN,NOACTION
+Bruteforce DNS,drop
+DoS ACK,drop
+DoS CWR,redirect
+DoS ECN,redirect
+DoS FIN,redirect
+DoS HTTP,drop
+DoS PSH,redirect
+DoS RST,redirect
+DoS SYN,drop
+DoS UDP,drop
+DoS URG,redirect
+Mirai DDoS DNS,drop
